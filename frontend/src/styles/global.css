@@ -1,0 +1,273 @@
+/* Base + every interactive state from the design.
+   Hover styling lives here rather than inline: inline styles outrank class
+   rules, so any property that changes on hover must not also be set inline. */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: #15181d;
+  color: #e9ecf0;
+  font-family: 'Satoshi', system-ui, sans-serif;
+  overflow-x: hidden;
+  text-wrap: pretty;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: #e9ecf0;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #45d9ef;
+}
+
+:focus-visible {
+  outline: 2px solid #45d9ef;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: rgba(123, 104, 250, 0.35);
+  color: #e9ecf0;
+}
+
+input {
+  font-family: inherit;
+}
+
+@keyframes spin360 {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ringspin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mq-a {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes mq-b {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes caretblink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- nav ---------- */
+
+.nav-link {
+  color: #9aa2ad;
+  transition: color 0.3s;
+}
+
+.nav-link:hover {
+  color: #e9ecf0;
+}
+
+/* Set by the ScrollTrigger that tracks the section in view. */
+.nav-link[data-active='true'] {
+  color: #e9ecf0;
+}
+
+.nav-link[data-active='true'] .nav-dot {
+  opacity: 1;
+}
+
+/* ---------- ask bar ---------- */
+
+.ask-submit {
+  border: 1px solid #2f353e;
+  color: #e9ecf0;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
+}
+
+.ask-submit:hover {
+  border-color: #7b68fa;
+  color: #45d9ef;
+}
+
+.ask-chip {
+  border: 1px solid #2f353e;
+  color: #9aa2ad;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
+}
+
+.ask-chip:hover {
+  border-color: #7b68fa;
+  color: #e9ecf0;
+}
+
+.ask-close {
+  border: 1px solid #2f353e;
+  color: #9aa2ad;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
+}
+
+.ask-close:hover {
+  border-color: #7b68fa;
+  color: #e9ecf0;
+}
+
+/* Source pills under the answer, and the labels pinned to canvas nodes. */
+.source-pill {
+  border: 1px solid rgba(123, 104, 250, 0.4);
+  color: #9aa2ad;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
+}
+
+.source-pill:hover {
+  border-color: #45d9ef;
+  color: #45d9ef;
+}
+
+.source-label {
+  border: 1px solid rgba(123, 104, 250, 0.55);
+  color: #e9ecf0;
+  transition:
+    border-color 0.25s,
+    color 0.25s;
+}
+
+.source-label:hover {
+  border-color: #45d9ef;
+  color: #45d9ef;
+}
+
+/* ---------- stack ---------- */
+
+/* --brand is set per tile from content data. */
+.tile {
+  border: 1px solid #2f353e;
+  transition:
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s;
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  background-image:
+    linear-gradient(#1e2228, #1e2228), linear-gradient(135deg, #7b68fa, #45d9ef);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.tile svg {
+  color: #9aa2ad;
+  transition: color 0.3s;
+}
+
+.tile:hover svg {
+  color: var(--brand);
+}
+
+.tile-tip {
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.tile:hover .tile-tip {
+  opacity: 1;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ---------- projects ---------- */
+
+/* Below the pin breakpoint the horizontal track becomes a plain column.
+   Kept in CSS so it matches the breakpoint useSiteAnimations checks. */
+@media (max-width: 899px) {
+  [data-track] {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  [data-track] [data-card] {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-track] {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  [data-track] [data-card] {
+    width: 100%;
+  }
+}
+
+/* ---------- contact ---------- */
+
+.sweep-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sweep:hover .sweep-line,
+.sweep:focus-visible .sweep-line {
+  transform: scaleX(1);
+}
+
+.contact-link {
+  border: 1px solid #2f353e;
+  color: #9aa2ad;
+  transition: color 0.25s;
+}
+
+.contact-link:hover {
+  color: #e9ecf0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
