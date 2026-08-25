@@ -181,6 +181,15 @@ router.include_router(
 )
 router.include_router(
     singleton_router(
+        path="/theme",
+        name="theme",
+        model=models.ThemeSettings,
+        update_schema=schemas.ThemeUpdate,
+        row_schema=schemas.ThemeRow,
+    )
+)
+router.include_router(
+    singleton_router(
         path="/ask",
         name="ask settings",
         model=models.AskSettings,
@@ -245,6 +254,14 @@ for spec in (
         create_schema=schemas.FootnoteCreate,
         update_schema=schemas.FootnoteUpdate,
         row_schema=schemas.FootnoteRow,
+    ),
+    dict(
+        path="/theme-templates",
+        name="theme template",
+        model=models.ThemeTemplate,
+        create_schema=schemas.ThemeTemplateCreate,
+        update_schema=schemas.ThemeTemplateUpdate,
+        row_schema=schemas.ThemeTemplateRow,
     ),
     dict(
         path="/answers",

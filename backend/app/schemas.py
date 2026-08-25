@@ -13,7 +13,7 @@ optional: writes are PATCH-style, only what is sent changes.
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
 
 # --------------------------------------------------------------------------- #
@@ -149,9 +149,61 @@ class ContactOut(Public):
     place: str
 
 
+class ThemeColorsOut(Public):
+    bg: str
+    surface: str
+    border: str
+    text: str
+    muted: str
+    accent: str
+    accent_alt: str
+
+
+class ThemeCursorOut(Public):
+    style: str
+    size: int
+    spin: bool
+
+
+class ThemeTrailOut(Public):
+    enabled: bool
+    particle: str
+    links: bool
+    link_distance: int
+    threads: bool
+    motion: str
+    speed: int
+    life: int
+    opacity: int
+    size: int
+    density: int
+    color: str
+    swirl: int
+    repel: int
+    burst: bool
+    reduced: str
+
+
+class ThemeOut(Public):
+    """
+    Grouped rather than flat, unlike the table it comes from.
+
+    The seven colours, the cursor, and the trail are consumed by three different
+    parts of the frontend, so they arrive as three objects — `theme.ts` takes the
+    colours, `Cursor` takes the cursor, `trail.ts` takes the trail, and none of
+    them has to know the column prefixes.
+    """
+
+    preset: str
+    colors: ThemeColorsOut
+    cursor: ThemeCursorOut
+    trail: ThemeTrailOut
+
+
 class SiteContent(Public):
     """Everything the site renders, in one response."""
 
+    theme: ThemeOut
     profile: ProfileOut
     nav: list[NavItemOut]
     ask: AskOut
@@ -248,6 +300,114 @@ class AskSettingsUpdate(Admin):
 
 
 class AskSettingsRow(Row, AskSettingsUpdate):
+    pass
+
+
+HEX = "^#[0-9A-Fa-f]{6}$"
+
+
+class ThemeUpdate(Admin):
+    """
+    Every knob, bounded.
+
+    The ranges are not decoration: these values drive a particle simulation and a
+    stylesheet, and a life of 0 or an opacity of 900 is a broken-looking site
+    rather than a validation error the editor would ever see. Clamping at the
+    edge of the API means the frontend can trust what it reads.
+    """
+
+    preset: Optional[str] = Field(default=None, max_length=40)
+
+    color_bg: Optional[str] = Field(default=None, pattern=HEX)
+    color_surface: Optional[str] = Field(default=None, pattern=HEX)
+    color_border: Optional[str] = Field(default=None, pattern=HEX)
+    color_text: Optional[str] = Field(default=None, pattern=HEX)
+    color_muted: Optional[str] = Field(default=None, pattern=HEX)
+    color_accent: Optional[str] = Field(default=None, pattern=HEX)
+    color_accent_alt: Optional[str] = Field(default=None, pattern=HEX)
+
+    cursor_style: Optional[str] = Field(
+        default=None, pattern="^(reticle|ring|dot|crosshair|halo|native)$"
+    )
+    cursor_size: Optional[int] = Field(default=None, ge=12, le=96)
+    cursor_spin: Optional[bool] = None
+
+    trail_enabled: Optional[bool] = None
+    trail_particle: Optional[str] = Field(
+        default=None, pattern="^(dot|ring|square|spark|plus|diamond)$"
+    )
+    trail_links: Optional[bool] = None
+    trail_link_distance: Optional[int] = Field(default=None, ge=0, le=320)
+    trail_threads: Optional[bool] = None
+    trail_motion: Optional[str] = Field(
+        default=None, pattern="^(follow|opposite|random|outward|inward|still)$"
+    )
+    trail_speed: Optional[int] = Field(default=None, ge=0, le=300)
+    trail_life: Optional[int] = Field(default=None, ge=100, le=8000)
+    trail_opacity: Optional[int] = Field(default=None, ge=0, le=100)
+    trail_size: Optional[int] = Field(default=None, ge=1, le=60)
+    trail_density: Optional[int] = Field(default=None, ge=2, le=60)
+    trail_color: Optional[str] = Field(
+        default=None, pattern="^(theme|accent|accent-alt|white|muted)$"
+    )
+    trail_swirl: Optional[int] = Field(default=None, ge=0, le=100)
+    trail_repel: Optional[int] = Field(default=None, ge=0, le=100)
+    trail_burst: Optional[bool] = None
+    trail_reduced: Optional[str] = Field(default=None, pattern="^(calm|full|off)$")
+
+
+class ThemeRow(Row, ThemeUpdate):
+    pass
+
+
+#: The half of `ThemeUpdate` a template carries — the pointer, not the palette.
+POINTER_FIELDS = frozenset(
+    name
+    for name in ThemeUpdate.model_fields
+    if name.startswith("cursor_") or name.startswith("trail_")
+)
+
+
+def _clean_pointer_settings(value: dict) -> dict:
+    """
+    A template's payload, held to the same standard as a live write.
+
+    Run through `ThemeUpdate` so every value is range-checked exactly once, in
+    one place; anything outside the pointer half is dropped rather than rejected,
+    so a template saved from a future version of the form does not 422 here.
+    """
+    if not isinstance(value, dict):
+        raise ValueError("settings must be an object")
+    known = {k: v for k, v in value.items() if k in POINTER_FIELDS}
+    checked = ThemeUpdate.model_validate(known)
+    return checked.model_dump(exclude_unset=True)
+
+
+class ThemeTemplateCreate(Admin):
+    name: str = Field(min_length=1, max_length=80)
+    note: str = Field(default="", max_length=200)
+    settings: dict = Field(default_factory=dict)
+    position: int = 0
+
+    @field_validator("settings")
+    @classmethod
+    def _check_settings(cls, value: dict) -> dict:
+        return _clean_pointer_settings(value)
+
+
+class ThemeTemplateUpdate(Admin):
+    name: Optional[str] = Field(default=None, min_length=1, max_length=80)
+    note: Optional[str] = Field(default=None, max_length=200)
+    settings: Optional[dict] = None
+    position: Optional[int] = None
+
+    @field_validator("settings")
+    @classmethod
+    def _check_settings(cls, value: dict | None) -> dict | None:
+        return None if value is None else _clean_pointer_settings(value)
+
+
+class ThemeTemplateRow(Row, ThemeTemplateCreate):
     pass
 
 

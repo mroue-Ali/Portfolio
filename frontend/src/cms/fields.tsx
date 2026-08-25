@@ -17,6 +17,7 @@ export type FieldType =
   | 'text'
   | 'textarea'
   | 'number'
+  | 'range'
   | 'toggle'
   | 'list'
   | 'color'
@@ -34,6 +35,12 @@ export type FieldSpec = {
   placeholder?: string;
   rows?: number;
   options?: readonly { value: string; label: string }[];
+  /** Range fields only. */
+  min?: number;
+  max?: number;
+  step?: number;
+  /** Printed after the value, e.g. `%` or `ms`. */
+  unit?: string;
   /** Wide fields take the whole row; the rest pair up. */
   span?: 1 | 2;
   /** Placeholder for a new entry in a list field. */
@@ -161,6 +168,61 @@ export function Toggle({
       </span>
       <span style={{ fontSize: 13, color: checked ? cms.text : cms.muted }}>{label}</span>
     </button>
+  );
+}
+
+/**
+ * A number you set by feel rather than by typing.
+ *
+ * Every value it edits is a physical quantity — a duration, an opacity, a
+ * distance — where the useful question is "more or less", not "which integer".
+ * The readout stays because the useful answer is sometimes still an integer.
+ */
+export function RangeInput({
+  value,
+  onChange,
+  min = 0,
+  max = 100,
+  step = 1,
+  unit,
+  id,
+}: {
+  value: number;
+  onChange: (next: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  id?: string;
+}) {
+  const current = Number.isFinite(value) ? value : min;
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+      <input
+        id={id}
+        className="cms-range"
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={current}
+        onChange={(e) => onChange(Number(e.target.value))}
+      />
+      <span
+        style={{
+          ...mono,
+          fontSize: 11,
+          letterSpacing: '0.08em',
+          color: cms.text,
+          minWidth: 62,
+          textAlign: 'right',
+          flex: 'none',
+        }}
+      >
+        {current}
+        {unit ?? ''}
+      </span>
+    </div>
   );
 }
 
@@ -394,6 +456,18 @@ export function FieldControl({
           value={value === null || value === undefined ? '' : String(value)}
           placeholder={spec.placeholder}
           onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+        />
+      );
+    case 'range':
+      return (
+        <RangeInput
+          id={id}
+          value={value as number}
+          onChange={onChange}
+          min={spec.min}
+          max={spec.max}
+          step={spec.step}
+          unit={spec.unit}
         />
       );
     case 'toggle':

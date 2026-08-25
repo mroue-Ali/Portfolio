@@ -100,7 +100,7 @@ export function Contact() {
                   right: 0,
                   bottom: -6,
                   height: 2,
-                  background: 'linear-gradient(90deg, #7B68FA, #45D9EF)',
+                  background: `linear-gradient(90deg, ${color.accent}, ${color.accentAlt})`,
                 }}
               />
             </a>
@@ -115,7 +115,7 @@ export function Contact() {
               alignItems: 'center',
               gap: 12,
               padding: '17px 28px',
-              border: `1px solid ${color.violet}`,
+              border: `1px solid ${color.accent}`,
               borderRadius: 3,
               background: color.surface,
               color: color.text,
@@ -128,7 +128,7 @@ export function Contact() {
             }}
           >
             <Editable bind={edit.contact.cta()} />
-            <span aria-hidden="true" style={{ color: color.cyan }}>
+            <span aria-hidden="true" style={{ color: color.accentAlt }}>
               →
             </span>
           </a>

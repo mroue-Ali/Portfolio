@@ -249,7 +249,7 @@ export function useSiteAnimations() {
           start: 'top 55%',
           once: true,
           onEnter: () => {
-            gsap.set(dot, { backgroundColor: color.violet, borderColor: color.cyan });
+            gsap.set(dot, { backgroundColor: color.accent, borderColor: color.accentAlt });
             gsap.fromTo(
               dot,
               { scale: 1 },

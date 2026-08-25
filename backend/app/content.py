@@ -28,7 +28,8 @@ def build_content(db: Session) -> schemas.SiteContent:
     about = db.get(models.AboutContent, 1)
     contact = db.get(models.ContactContent, 1)
     ask = db.get(models.AskSettings, 1)
-    if not (profile and about and contact and ask):
+    theme = db.get(models.ThemeSettings, 1)
+    if not (profile and about and contact and ask and theme):
         raise LookupError("content tables are empty — run `python -m app.seed`")
 
     answers = list(
@@ -69,6 +70,41 @@ def build_content(db: Session) -> schemas.SiteContent:
     contact_eyebrow, contact_heading = _heading(sections, "contact")
 
     return schemas.SiteContent(
+        theme=schemas.ThemeOut(
+            preset=theme.preset,
+            colors=schemas.ThemeColorsOut(
+                bg=theme.color_bg,
+                surface=theme.color_surface,
+                border=theme.color_border,
+                text=theme.color_text,
+                muted=theme.color_muted,
+                accent=theme.color_accent,
+                accent_alt=theme.color_accent_alt,
+            ),
+            cursor=schemas.ThemeCursorOut(
+                style=theme.cursor_style,
+                size=theme.cursor_size,
+                spin=theme.cursor_spin,
+            ),
+            trail=schemas.ThemeTrailOut(
+                enabled=theme.trail_enabled,
+                particle=theme.trail_particle,
+                links=theme.trail_links,
+                link_distance=theme.trail_link_distance,
+                threads=theme.trail_threads,
+                motion=theme.trail_motion,
+                speed=theme.trail_speed,
+                life=theme.trail_life,
+                opacity=theme.trail_opacity,
+                size=theme.trail_size,
+                density=theme.trail_density,
+                color=theme.trail_color,
+                swirl=theme.trail_swirl,
+                repel=theme.trail_repel,
+                burst=theme.trail_burst,
+                reduced=theme.trail_reduced,
+            ),
+        ),
         profile=schemas.ProfileOut(
             name=profile.name,
             role=profile.role,

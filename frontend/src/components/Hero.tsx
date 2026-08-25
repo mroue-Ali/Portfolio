@@ -4,10 +4,9 @@ import { answers, ask as askConfig, profile } from '../content';
 import { Editable } from '../live/Editable';
 import { edit } from '../live/bindings';
 import { useEditMode } from '../live/mode';
-import { useVectorField } from '../hooks/useVectorField';
 import { streamAnswer } from '../lib/ask';
 import { prefersReducedMotion } from '../lib/motion';
-import { color, font, gradient, textGradient } from '../theme';
+import { color, font, gradient, rgb, textGradient } from '../theme';
 
 const monoMeta = {
   fontFamily: font.mono,
@@ -35,7 +34,6 @@ export function Hero() {
   const [streaming, setStreaming] = useState(false);
   const [used, setUsed] = useState(0);
 
-  const canvasEl = useRef<HTMLCanvasElement>(null);
   const heroText = useRef<HTMLDivElement>(null);
   const chipRow = useRef<HTMLDivElement>(null);
   const answerPanel = useRef<HTMLDivElement>(null);
@@ -48,8 +46,6 @@ export function Hero() {
   const inFlight = useRef<AbortController | null>(null);
   const openRef = useRef(false);
   const usedRef = useRef(0);
-
-  useVectorField({ canvasRef: canvasEl });
 
   const close = useCallback(() => {
     inFlight.current?.abort();
@@ -221,13 +217,6 @@ export function Hero() {
         overflow: 'hidden',
       }}
     >
-      <canvas
-        ref={canvasEl}
-        aria-hidden="true"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
-      />
-
-
       <div style={{ position: 'relative', zIndex: 5, width: '100%', maxWidth: 1180, margin: '0 auto' }}>
         <div ref={heroText} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div
@@ -248,8 +237,8 @@ export function Hero() {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: color.cyan,
-                boxShadow: '0 0 10px rgba(69,217,239,0.9)',
+                background: color.accentAlt,
+                boxShadow: `0 0 10px rgba(${rgb(color.accentAlt)},0.9)`,
               }}
             />
             <Editable bind={edit.profile.availability()} />
@@ -369,7 +358,7 @@ export function Hero() {
                 aspectRatio: '1',
                 margin: '-110% 0 0 -110%',
                 background:
-                  'conic-gradient(from 0deg, transparent 0deg, transparent 300deg, #7B68FA 340deg, #45D9EF 356deg, transparent 360deg)',
+                  `conic-gradient(from 0deg, transparent 0deg, transparent 300deg, ${color.accent} 340deg, ${color.accentAlt} 356deg, transparent 360deg)`,
                 animation: 'spin360 3s linear infinite',
               }}
             />
@@ -390,7 +379,7 @@ export function Hero() {
                   fontFamily: font.mono,
                   fontSize: 12,
                   letterSpacing: '0.15em',
-                  color: color.violet,
+                  color: color.accent,
                 }}
               >
                 &gt;
@@ -477,7 +466,7 @@ export function Hero() {
                 padding: '22px 24px',
                 border: `1px solid ${color.border}`,
                 borderRadius: 4,
-                background: 'rgba(30,34,40,0.86)',
+                background: `rgba(${rgb(color.surface)},0.86)`,
                 backdropFilter: 'blur(10px)',
               }}
             >
@@ -531,7 +520,7 @@ export function Hero() {
                       display: 'inline-block',
                       width: 8,
                       marginLeft: 2,
-                      borderBottom: `2px solid ${color.cyan}`,
+                      borderBottom: `2px solid ${color.accentAlt}`,
                       animation: 'caretblink 1s step-end infinite',
                     }}
                   />

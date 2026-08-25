@@ -20,6 +20,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { SectionsPage } from './pages/SectionsPage';
 import { StackPage } from './pages/StackPage';
+import { ThemePage } from './pages/ThemePage';
 import { UsersPage } from './pages/UsersPage';
 import { ADMIN_ROOT, useRoute } from './router';
 import { restore, signOut, useSession } from './session';
@@ -43,6 +44,7 @@ const PAGES: Page[] = [
   { slug: 'experience', label: 'Experience', render: () => <ExperiencePage /> },
   { slug: 'contact', label: 'Contact', render: () => <ContactPage /> },
   { slug: 'ask', label: 'Ask bar', render: () => <AskPage /> },
+  { slug: 'theme', label: 'Theme', render: () => <ThemePage /> },
   { slug: 'ai', label: 'AI', render: () => <AiPage /> },
   { slug: 'account', label: 'Account', render: () => <UsersPage /> },
 ];

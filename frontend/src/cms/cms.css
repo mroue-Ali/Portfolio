@@ -59,6 +59,97 @@
   min-height: 84px;
 }
 
+/* Sliders. The track and thumb have to be styled per engine — there is no
+   shared shorthand — so the two blocks below say the same thing twice. */
+.cms-range {
+  flex: 1;
+  min-width: 0;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.cms-range::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.cms-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  transition: transform 0.15s;
+}
+
+.cms-range::-moz-range-track {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.cms-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  transition: transform 0.15s;
+}
+
+.cms-range:hover::-webkit-slider-thumb,
+.cms-range:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.cms-range:hover::-moz-range-thumb,
+.cms-range:focus-visible::-moz-range-thumb {
+  transform: scale(1.2);
+}
+
+/* One option in a picker grid — a palette, a cursor, a particle shape. */
+.cms-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.18s,
+    background 0.18s,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cms-option:hover {
+  border-color: var(--violet);
+  transform: translateY(-2px);
+}
+
+.cms-option[data-active='true'] {
+  border-color: transparent;
+  background:
+    linear-gradient(var(--raised), var(--raised)),
+    linear-gradient(135deg, var(--violet), var(--cyan));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
 .cms-input:hover,
 .cms-textarea:hover,
 .cms-select:hover {

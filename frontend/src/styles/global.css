@@ -2,14 +2,36 @@
    Hover styling lives here rather than inline: inline styles outrank class
    rules, so any property that changes on hover must not also be set inline. */
 
+/* The palette, as the seven roles everything else is written in terms of.
+   These values are the bundled defaults; `applyTheme()` in src/theme.ts
+   overwrites them on the root element as soon as the CMS's theme has loaded,
+   which is what makes a palette change reach the stylesheet at all. Declaring
+   them here as well means the site still renders correctly if that never runs. */
+:root {
+  --c-bg: #15181d;
+  --c-surface: #1e2228;
+  --c-border: #2f353e;
+  --c-text: #e9ecf0;
+  --c-muted: #9aa2ad;
+  --c-accent: #7b68fa;
+  --c-accent-alt: #45d9ef;
+
+  --c-bg-rgb: 21, 24, 29;
+  --c-text-rgb: 233, 236, 240;
+  --c-accent-rgb: 123, 104, 250;
+  --c-accent-alt-rgb: 69, 217, 239;
+
+  --g-brand: linear-gradient(135deg, #7b68fa, #45d9ef);
+}
+
 html {
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: #15181d;
-  color: #e9ecf0;
+  background: var(--c-bg);
+  color: var(--c-text);
   font-family: 'Satoshi', system-ui, sans-serif;
   overflow-x: hidden;
   text-wrap: pretty;
@@ -19,24 +41,36 @@ body {
   box-sizing: border-box;
 }
 
+/* The site draws its own pointer (components/Cursor.tsx). The native one is
+   hidden only where a pointer that can hover exists, and only while that
+   component is mounted — so the CMS, and any touch device, keep the system
+   cursor. !important because the UA rules for a/button/input are more specific
+   than a rule on the element itself. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-native-cursor='off'],
+  html[data-native-cursor='off'] * {
+    cursor: none !important;
+  }
+}
+
 a {
-  color: #e9ecf0;
+  color: var(--c-text);
   text-decoration: none;
 }
 
 a:hover {
-  color: #45d9ef;
+  color: var(--c-accent-alt);
 }
 
 :focus-visible {
-  outline: 2px solid #45d9ef;
+  outline: 2px solid var(--c-accent-alt);
   outline-offset: 3px;
   border-radius: 2px;
 }
 
 ::selection {
-  background: rgba(123, 104, 250, 0.35);
-  color: #e9ecf0;
+  background: rgba(var(--c-accent-rgb), 0.35);
+  color: var(--c-text);
 }
 
 input {
@@ -69,17 +103,17 @@ input {
 /* ---------- nav ---------- */
 
 .nav-link {
-  color: #9aa2ad;
+  color: var(--c-muted);
   transition: color 0.3s;
 }
 
 .nav-link:hover {
-  color: #e9ecf0;
+  color: var(--c-text);
 }
 
 /* Set by the ScrollTrigger that tracks the section in view. */
 .nav-link[data-active='true'] {
-  color: #e9ecf0;
+  color: var(--c-text);
 }
 
 .nav-link[data-active='true'] .nav-dot {
@@ -89,49 +123,49 @@ input {
 /* ---------- ask bar ---------- */
 
 .ask-submit {
-  border: 1px solid #2f353e;
-  color: #e9ecf0;
+  border: 1px solid var(--c-border);
+  color: var(--c-text);
   transition:
     border-color 0.25s,
     color 0.25s;
 }
 
 .ask-submit:hover {
-  border-color: #7b68fa;
-  color: #45d9ef;
+  border-color: var(--c-accent);
+  color: var(--c-accent-alt);
 }
 
 .ask-chip {
-  border: 1px solid #2f353e;
-  color: #9aa2ad;
+  border: 1px solid var(--c-border);
+  color: var(--c-muted);
   transition:
     border-color 0.25s,
     color 0.25s;
 }
 
 .ask-chip:hover {
-  border-color: #7b68fa;
-  color: #e9ecf0;
+  border-color: var(--c-accent);
+  color: var(--c-text);
 }
 
 .ask-close {
-  border: 1px solid #2f353e;
-  color: #9aa2ad;
+  border: 1px solid var(--c-border);
+  color: var(--c-muted);
   transition:
     border-color 0.25s,
     color 0.25s;
 }
 
 .ask-close:hover {
-  border-color: #7b68fa;
-  color: #e9ecf0;
+  border-color: var(--c-accent);
+  color: var(--c-text);
 }
 
 /* ---------- stack ---------- */
 
 /* --brand is set per tile from content data. */
 .tile {
-  border: 1px solid #2f353e;
+  border: 1px solid var(--c-border);
   transition:
     transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.3s;
@@ -141,13 +175,13 @@ input {
   transform: translateY(-4px);
   border-color: transparent;
   background-image:
-    linear-gradient(#1e2228, #1e2228), linear-gradient(135deg, #7b68fa, #45d9ef);
+    linear-gradient(var(--c-surface), var(--c-surface)), var(--g-brand);
   background-origin: border-box;
   background-clip: padding-box, border-box;
 }
 
 .tile svg {
-  color: #9aa2ad;
+  color: var(--c-muted);
   transition: color 0.3s;
 }
 
@@ -210,11 +244,11 @@ input {
 /* Each entry is one anchor wrapping a text panel and its screenshot, so the
    global a:hover colour has to be undone or every line inside would go cyan. */
 .project-card {
-  color: #e9ecf0;
+  color: var(--c-text);
 }
 
 .project-panel {
-  border: 1px solid #2f353e;
+  border: 1px solid var(--c-border);
   transition:
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.45s;
@@ -223,7 +257,7 @@ input {
 .project-card:hover .project-panel,
 .project-card:focus-visible .project-panel {
   transform: translateY(-6px);
-  border-color: #7b68fa;
+  border-color: var(--c-accent);
 }
 
 /* Takes the width the panel leaves; min-width:0 stops flex from letting the
@@ -233,12 +267,12 @@ input {
   flex: 1 1 0;
   min-width: 0;
   margin: 0;
-  border: 1px solid #2f353e;
+  border: 1px solid var(--c-border);
   border-radius: 4px;
   overflow: hidden;
   background:
-    linear-gradient(160deg, #22272e, #15181d),
-    repeating-linear-gradient(45deg, #1e2228 0 12px, #191d23 12px 24px);
+    linear-gradient(160deg, var(--c-border), var(--c-bg)),
+    repeating-linear-gradient(45deg, var(--c-surface) 0 12px, var(--c-bg) 12px 24px);
   transition:
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.45s;
@@ -248,7 +282,7 @@ input {
 .project-card:hover .project-shot,
 .project-card:focus-visible .project-shot {
   transform: translateY(-6px);
-  border-color: #7b68fa;
+  border-color: var(--c-accent);
 }
 
 .shot-img {
@@ -269,11 +303,11 @@ input {
   left: 16px;
   bottom: 14px;
   padding: 6px 11px;
-  border: 1px solid #2f353e;
+  border: 1px solid var(--c-border);
   border-radius: 3px;
-  background: rgba(21, 24, 29, 0.72);
+  background: rgba(var(--c-bg-rgb), 0.72);
   backdrop-filter: blur(6px);
-  color: #9aa2ad;
+  color: var(--c-muted);
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
   letter-spacing: 0.16em;
@@ -281,19 +315,19 @@ input {
 }
 
 .card-cta {
-  color: #9aa2ad;
+  color: var(--c-muted);
   transition: color 0.3s;
 }
 
 .card-cta-arrow {
-  color: #45d9ef;
+  color: var(--c-accent-alt);
   display: inline-block;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .project-card:hover .card-cta,
 .project-card:focus-visible .card-cta {
-  color: #e9ecf0;
+  color: var(--c-text);
 }
 
 .project-card:hover .card-cta-arrow,
@@ -360,13 +394,13 @@ input {
 }
 
 .contact-link {
-  border: 1px solid #2f353e;
-  color: #9aa2ad;
+  border: 1px solid var(--c-border);
+  color: var(--c-muted);
   transition: color 0.25s;
 }
 
 .contact-link:hover {
-  color: #e9ecf0;
+  color: var(--c-text);
 }
 
 @media (prefers-reduced-motion: reduce) {

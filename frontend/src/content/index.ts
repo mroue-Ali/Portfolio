@@ -28,6 +28,7 @@ import type {
   ProjectsContent,
   SiteContent,
   StackContent,
+  ThemeContent,
 } from './types';
 
 export type {
@@ -47,11 +48,26 @@ export type {
   StackGroup,
   StackTile,
   Stat,
+  ThemeColors,
+  ThemeContent,
+  ThemeCursor,
+  ThemeTrail,
+  CursorStyle,
+  ReducedMotion,
+  TrailColor,
+  TrailMotion,
+  TrailParticle,
 } from './types';
 
 /** Cloned so the fallback in `defaults` stays pristine after hydration. */
 const clone = <T,>(value: T): T => structuredClone(value);
 
+/**
+ * Colours, cursor and trail. Read by `theme.ts` (which writes the CSS custom
+ * properties), by `Cursor`, and by `lib/trail.ts` — all of them after
+ * `loadContent()` has run, so they see the CMS's values and not these.
+ */
+export const theme: ThemeContent = clone(defaults.theme);
 export const profile: Profile = clone(defaults.profile);
 export const nav: NavItem[] = clone(defaults.nav);
 export const ask: AskConfig = clone(defaults.ask);
@@ -106,6 +122,14 @@ const fillList = <T,>(target: T[], next: T[] | undefined) => {
 };
 
 function hydrate(data: SiteContent) {
+  // Nested one level, so a malformed group falls back on its own rather than
+  // taking the other two down with it.
+  if (data.theme && typeof data.theme === 'object') {
+    if (typeof data.theme.preset === 'string') theme.preset = data.theme.preset;
+    fill(theme.colors, data.theme.colors);
+    fill(theme.cursor, data.theme.cursor);
+    fill(theme.trail, data.theme.trail);
+  }
   fill(profile, data.profile);
   fillList(nav, data.nav);
   fill(ask, data.ask);

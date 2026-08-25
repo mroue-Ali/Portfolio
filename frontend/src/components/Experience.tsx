@@ -45,7 +45,7 @@ export function Experience() {
               top: 6,
               bottom: 6,
               width: 2,
-              background: 'linear-gradient(180deg, #7B68FA, #45D9EF)',
+              background: `linear-gradient(180deg, ${color.accent}, ${color.accentAlt})`,
               transform: 'scaleY(0)',
               transformOrigin: 'top center',
             }}
@@ -77,7 +77,7 @@ export function Experience() {
                       fontSize: 11,
                       letterSpacing: '0.15em',
                       textTransform: 'uppercase',
-                      color: color.cyan,
+                      color: color.accentAlt,
                     }}
                   />
                   <Editable

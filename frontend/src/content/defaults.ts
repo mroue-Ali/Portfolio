@@ -12,6 +12,7 @@
 
 import type {
   AboutContent,
+  ThemeContent,
   Answer,
   AskConfig,
   ContactContent,
@@ -25,6 +26,44 @@ import type {
   StackGroup,
   Stat,
 } from './types';
+
+/**
+ * The palette and pointer the site ships with.
+ *
+ * Matches THEME in `backend/app/seed.py` and the row the theme migration
+ * inserts, so a site running on the bundled copy looks like the seeded one.
+ */
+export const theme: ThemeContent = {
+  preset: 'graphite-violet',
+  colors: {
+    bg: '#15181D',
+    surface: '#1E2228',
+    border: '#2F353E',
+    text: '#E9ECF0',
+    muted: '#9AA2AD',
+    accent: '#7B68FA',
+    accentAlt: '#45D9EF',
+  },
+  cursor: { style: 'reticle', size: 36, spin: true },
+  trail: {
+    enabled: true,
+    particle: 'dot',
+    links: true,
+    linkDistance: 112,
+    threads: true,
+    motion: 'follow',
+    speed: 100,
+    life: 1900,
+    opacity: 85,
+    size: 11,
+    density: 8,
+    color: 'theme',
+    swirl: 40,
+    repel: 40,
+    burst: true,
+    reduced: 'calm',
+  },
+};
 
 export const profile: Profile = {
   name: 'Ali Mroue',

@@ -105,6 +105,106 @@ class ContactContent(TimestampMixin, Base):
     place: Mapped[str] = mapped_column(String(120), default="", nullable=False)
 
 
+class ThemeSettings(TimestampMixin, Base):
+    """
+    How the site looks and how it answers the pointer.
+
+    Colours are stored as seven roles rather than a palette name: `preset` is a
+    label for which set they came from, and the CMS writes the seven columns when
+    one is picked. That way a preset is a starting point an editor can then take
+    apart, and the site never has to know the preset table at all.
+
+    The trail columns are the particle system in `frontend/src/lib/trail.ts`,
+    one column per knob. Percentages are stored 0-100 and durations in
+    milliseconds, so every value in this table is a plain integer an editor can
+    read — the conversion to the simulation's units happens in one place, in the
+    frontend, next to the physics that consumes them.
+    """
+
+    __tablename__ = "theme_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    #: Which shipped palette these colours came from; "custom" once edited.
+    preset: Mapped[str] = mapped_column(String(40), default="graphite-violet", nullable=False)
+
+    # Prefixed because `text` and `border` are reserved words in MySQL, and a
+    # column that needs quoting everywhere it appears is a column named badly.
+    color_bg: Mapped[str] = mapped_column(String(20), default="#15181D", nullable=False)
+    color_surface: Mapped[str] = mapped_column(String(20), default="#1E2228", nullable=False)
+    color_border: Mapped[str] = mapped_column(String(20), default="#2F353E", nullable=False)
+    color_text: Mapped[str] = mapped_column(String(20), default="#E9ECF0", nullable=False)
+    color_muted: Mapped[str] = mapped_column(String(20), default="#9AA2AD", nullable=False)
+    #: The two brand colours every gradient on the site is mixed from.
+    color_accent: Mapped[str] = mapped_column(String(20), default="#7B68FA", nullable=False)
+    color_accent_alt: Mapped[str] = mapped_column(String(20), default="#45D9EF", nullable=False)
+
+    #: "reticle" | "ring" | "dot" | "crosshair" | "halo" | "native".
+    cursor_style: Mapped[str] = mapped_column(String(20), default="reticle", nullable=False)
+    cursor_size: Mapped[int] = mapped_column(Integer, default=36, nullable=False)
+    #: Whether the reticle turns. Ignored by the styles that have no arcs.
+    cursor_spin: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    trail_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    #: What each node is drawn as — see TRAIL_PARTICLES in the frontend.
+    trail_particle: Mapped[str] = mapped_column(String(20), default="dot", nullable=False)
+    #: Lines between neighbouring nodes.
+    trail_links: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    trail_link_distance: Mapped[int] = mapped_column(Integer, default=112, nullable=False)
+    #: Lines from the live pointer back to the nodes nearest it.
+    trail_threads: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    #: Which way a node leaves the cursor — see TRAIL_MOTIONS in the frontend.
+    trail_motion: Mapped[str] = mapped_column(String(20), default="follow", nullable=False)
+    #: Share of the pointer's speed a node is launched with, as a percentage.
+    trail_speed: Mapped[int] = mapped_column(Integer, default=100, nullable=False)
+    #: Milliseconds from spawn to gone.
+    trail_life: Mapped[int] = mapped_column(Integer, default=1900, nullable=False)
+    #: Ceiling on how bright the whole trail draws, as a percentage.
+    trail_opacity: Mapped[int] = mapped_column(Integer, default=85, nullable=False)
+    #: Base node radius in pixels, before speed and age scale it.
+    trail_size: Mapped[int] = mapped_column(Integer, default=11, nullable=False)
+    #: Pixels of pointer travel between two nodes. Lower is denser.
+    trail_density: Mapped[int] = mapped_column(Integer, default=8, nullable=False)
+    #: "theme" | "accent" | "accent-alt" | "white" | "muted".
+    trail_color: Mapped[str] = mapped_column(String(20), default="theme", nullable=False)
+    #: Strength of the curl field that makes nodes wander, as a percentage.
+    trail_swirl: Mapped[int] = mapped_column(Integer, default=40, nullable=False)
+    #: How hard the pointer pushes nodes out of its way, as a percentage.
+    trail_repel: Mapped[int] = mapped_column(Integer, default=40, nullable=False)
+    #: Whether a click throws a ring of nodes outwards.
+    trail_burst: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    #: What a visitor who asked their system for less motion gets:
+    #: "calm" keeps the nodes but takes the travel out, "full" ignores the
+    #: request, "off" shows them nothing. See CALM in frontend/src/lib/trail.ts.
+    trail_reduced: Mapped[str] = mapped_column(String(10), default="calm", nullable=False)
+
+
+class ThemeTemplate(TimestampMixin, Ordered, Base):
+    """
+    A pointer setup, saved under a name so it can be brought back in one click.
+
+    Covers the cursor and the trail, not the palette: colours already have their
+    own presets and their own picker, and an editor who has spent an evening
+    tuning a trail wants it back without their brand changing underneath them.
+
+    The settings are one JSON column rather than a second copy of the eighteen
+    on `theme_settings`. A template is written and read as a whole, never queried
+    a field at a time, and mirroring the columns would mean every new knob had to
+    be added to two tables and a migration written for both. The trade is that
+    the database cannot check the contents, so `ThemeTemplateCreate` runs them
+    through the same validator the live settings go through.
+    """
+
+    __tablename__ = "theme_templates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    #: Unique so that "apply the tested one" cannot be ambiguous.
+    name: Mapped[str] = mapped_column(String(80), unique=True, nullable=False)
+    #: What it is for, in a line. Shown under the name in the CMS.
+    note: Mapped[str] = mapped_column(String(200), default="", nullable=False)
+    #: The `cursor_*` and `trail_*` fields of `theme_settings`, as saved.
+    settings: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+
+
 class AskSettings(TimestampMixin, Base):
     """Behaviour of the hero ask bar. Chips come from `answers.is_chip`."""
 

@@ -77,10 +77,10 @@ answer is produced is a `.env` setting; see *The ask bar* below.
 ## Schema
 
 Singletons (one row, `id = 1`, patch-only): `profile`, `about_content`,
-`contact_content`, `ask_settings`.
+`contact_content`, `ask_settings`, `theme_settings`.
 
 Collections (ordered by `position`): `sections`, `nav_items`, `stats`,
-`stack_groups` → `stack_tiles`, `projects`, `roles`, `footnotes`, `answers`.
+`stack_groups` → `stack_tiles`, `projects`, `roles`, `footnotes`, `answers`, `theme_templates`.
 
 `sections` holds the eyebrow + heading of each scroll section, keyed by anchor id
 (`about`, `stack`, …) — so section titles are editable without touching the rows
@@ -90,6 +90,25 @@ Short string lists (a project's `tags` and `points`, a group's `pills`, an
 answer's `keywords`, the profile's `specialities`, about's `paragraphs`) are JSON
 columns. They're edited as one list in one field and never queried individually;
 a table each would triple the schema for nothing.
+
+`theme_settings` is the one table that is not copy: the seven colour roles the
+site is drawn from, and every knob on the pointer and the trail it leaves. Colours
+are stored as roles rather than a palette name — `preset` is only a label for
+which set they came from, and reads `custom` once one has been edited by hand, so
+a shipped palette is a starting point rather than a lock. The trail columns hold
+an editor's units (percentages 0-100, milliseconds, pixels) and are range-checked
+in `ThemeUpdate`; the conversion into the simulation's units happens once, in
+`frontend/src/lib/trail.ts`. `trail_reduced` is the one that is a policy rather
+than a quantity: what a visitor whose system asks for less motion is shown —
+`calm`, `full`, or `off`.
+
+`theme_templates` saves the `cursor_*` and `trail_*` half of that row under a
+name, as one JSON column — a template is written and read whole, never queried a
+field at a time, and mirroring eighteen columns would mean every new knob needed
+two migrations. The database cannot check a JSON blob, so `ThemeTemplateCreate`
+runs the contents through `ThemeUpdate`, which range-checks every value and drops
+anything outside the pointer half. `python -m app.seed` inserts five starters. It reaches the site as `theme` on `/api/content`,
+grouped into `colors`, `cursor` and `trail`.
 
 `users` is the one table that is not content: CMS accounts, with a bcrypt hash,
 a role, and an `is_active` off switch. Content edits are not attributed to it —
@@ -162,8 +181,8 @@ DELETE /api/admin/{resource}/{id}       delete
 ```
 
 Resources: `nav`, `stats`, `stack-groups`, `stack-tiles`, `projects`, `roles`,
-`footnotes`, `answers`. Singletons expose `GET`/`PATCH` at
-`/api/admin/{profile,about,contact,ask}`. Sections are addressed by key:
+`footnotes`, `answers`, `theme-templates`. Singletons expose `GET`/`PATCH` at
+`/api/admin/{profile,about,contact,ask,theme}`. Sections are addressed by key:
 `/api/admin/sections/{key}`.
 
 Deleting a stack group deletes its tiles. Unique-constraint violations come back

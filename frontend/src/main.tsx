@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { isAdminPath } from './cms/router';
 import { loadContent } from './content';
+import { applyTheme } from './theme';
 import './styles/global.css';
 
 const root = () => createRoot(document.getElementById('root')!);
@@ -36,6 +37,11 @@ if (isAdminPath()) {
     if (source === 'fallback' && import.meta.env.DEV) {
       console.warn('[content] API unreachable — rendering the bundled copy.');
     }
+
+    // Before the first render, for the same reason the copy is: components read
+    // `color` while rendering, and the stylesheet reads the custom properties
+    // this writes. Doing it after would repaint the whole site in two passes.
+    applyTheme();
 
     root().render(
       <StrictMode>

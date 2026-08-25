@@ -1,5 +1,5 @@
 import { nav } from '../content';
-import { color, font, gradient } from '../theme';
+import { color, font, gradient, rgb } from '../theme';
 
 /**
  * Floating section nav. Hidden until the hero scrolls away, and the active pill
@@ -23,7 +23,7 @@ export function Nav() {
         padding: '7px 10px',
         border: `1px solid ${color.border}`,
         borderRadius: 999,
-        background: 'rgba(30,34,40,0.72)',
+        background: `rgba(${rgb(color.surface)},0.72)`,
         backdropFilter: 'blur(14px)',
       }}
     >

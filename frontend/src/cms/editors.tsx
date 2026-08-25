@@ -14,64 +14,19 @@
  * Drafts live in the form components, seeded from the row they mount with. That
  * is why the forms are separate components with a `key`: re-mounting on new data
  * is how React re-initialises state, and it beats an effect that copies props
- * into state on every render.
+ * into state on every render. The draft state itself is in `draft.ts`, which the
+ * bespoke pages reuse so that saving behaves the same everywhere.
  */
 
-import { useCallback, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { Collection, Row, Singleton } from './api';
+import { pick, useDraft, type Draft } from './draft';
 import { Fields, type FieldSpec } from './fields';
-import { normalise } from './normalise';
 import { contentChanged } from '../live/store';
-import { cms, message, mono, type SaveState } from './tokens';
+import { cms, message, mono } from './tokens';
 import { useResource } from './useResource';
 import { Button, Card, Chevron, DeleteButton, EmptyState, ErrorNote, IconButton, PageHeader, SaveStatus, Spinner } from './ui';
 import { Arrow } from './fields';
-
-type Draft = Record<string, unknown>;
-
-const changed = (draft: Draft, original: Draft) =>
-  JSON.stringify(draft) !== JSON.stringify(original);
-
-/** Only the fields the spec owns — never the id, timestamps, or position. */
-const pick = (specs: readonly FieldSpec[], row: Draft): Draft =>
-  Object.fromEntries(specs.map((spec) => [spec.name, row[spec.name]]));
-
-/**
- * Draft state for one record: what it says, whether it differs, and a save that
- * reports where it got to. Shared by both editors so "dirty" and "saved" mean
- * the same thing in a page form and in a collapsed row.
- */
-function useDraft(initial: Draft, specs: readonly FieldSpec[], write: (payload: Draft) => Promise<Draft | void>) {
-  const [draft, setDraft] = useState<Draft>(initial);
-  const [original, setOriginal] = useState<Draft>(initial);
-  const [state, setState] = useState<SaveState>('idle');
-  const [error, setError] = useState<string | null>(null);
-
-  const set = useCallback((name: string, value: unknown) => {
-    setDraft((prev) => ({ ...prev, [name]: value }));
-  }, []);
-
-  const save = async () => {
-    setState('saving');
-    setError(null);
-    try {
-      const payload = normalise(specs, draft);
-      const saved = await write(payload);
-      // The server may have normalised something; trust its copy when it sends one.
-      const settled = saved ? pick(specs, saved as Draft) : payload;
-      setDraft(settled);
-      setOriginal(settled);
-      setState('saved');
-      contentChanged();
-      window.setTimeout(() => setState('idle'), 1700);
-    } catch (err) {
-      setError(message(err));
-      setState('error');
-    }
-  };
-
-  return { draft, set, save, state, error, dirty: changed(draft, original) };
-}
 
 // --------------------------------------------------------------------------- //
 // Singleton

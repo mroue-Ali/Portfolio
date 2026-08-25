@@ -5,6 +5,7 @@ import { Cursor } from './components/Cursor';
 import { Experience } from './components/Experience';
 import { Hero } from './components/Hero';
 import { Nav } from './components/Nav';
+import { PointerField } from './components/PointerField';
 import { ProgressBar } from './components/ProgressBar';
 import { Projects } from './components/Projects';
 import { Stack } from './components/Stack';
@@ -32,6 +33,7 @@ export default function App() {
       <Backdrop />
       <ProgressBar />
       <Cursor />
+      <PointerField />
       <Nav />
 
       <Hero />

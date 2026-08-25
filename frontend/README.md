@@ -25,11 +25,11 @@ from the copy bundled in `src/content/defaults.ts`.
 | `src/content/types.ts` | The shapes both the API and the fallback satisfy. |
 | `src/content/defaults.ts` | The bundled copy, used when the API is unreachable. |
 | `src/content/icons.ts` | Generated SVG paths — do not edit by hand. |
-| `src/theme.ts` | Colours, fonts, gradients, shared type styles. |
+| `src/theme.ts` | The live palette, the shipped presets, `applyTheme()`, fonts and shared type styles. |
 | `src/styles/global.css` | Base styles, keyframes, and every hover state. |
 | `src/components/` | One file per section, plus the fixed overlays. |
 | `src/hooks/useSiteAnimations.ts` | Lenis + every ScrollTrigger, in one place. |
-| `src/hooks/useVectorField.ts` | The hero particle canvas. |
+| `src/lib/trail.ts` | The pointer trail: the whole particle simulation, as a plain module. |
 | `src/lib/ask.ts` | Ask-bar answer resolution. |
 | `src/cms/` | The CMS at `/admin`: sign-in, API client, form kit, one page per resource. |
 | `src/cms/ImageField.tsx` | Upload, drag-drop, and the library of what you have already uploaded. |
@@ -109,8 +109,37 @@ resources at once.
 | `src/cms/api.ts` | Typed client for every admin route, plus the token and error handling. |
 | `src/cms/session.ts` | Who is signed in. A module store, because the portfolio needs it too. |
 | `src/cms/editors.tsx` | The two editors everything is built from. |
+| `src/cms/draft.ts` | Draft state and saving, shared by the editors and the Theme page. |
 | `src/cms/fields.tsx` | The controls, and the spec that stamps them out. |
 | `src/cms/pages/` | One file per resource — mostly field specs. |
+| `src/cms/pages/ThemeTemplates.tsx` | Saved pointer setups: the one part of Theme with its own resource. |
+
+### Theme
+
+`/admin/theme` is the one page that is not a generated form, because two of its
+controls are not fields: picking a palette writes seven columns at once, and the
+preview runs the real particle simulation against the unsaved draft. It drives
+`useDraft` directly, so dirty state and saving behave exactly as they do on every
+other page.
+
+It edits four things. **Palette** - nine shipped sets, or any of the seven roles
+by hand; editing one by hand flips the preset label to `custom`. **Cursor** -
+which of six shapes replaces the system arrow, its size, and whether it turns;
+`native` gives the arrow back and switches the rest off. **Trail** - what the
+cursor generates as you move it: the mark, which direction nodes travel relative
+to your hand, how long they last, how bright they are, how far apart, how much
+they wander, whether they link to each other and back to the cursor, and what a
+visitor who has asked for reduced motion sees instead. **Templates** - whole
+pointer setups saved under a name, so a version worth keeping survives the next
+hour of experimenting; Apply loads one into the form rather than writing it, so
+it can be seen in the preview first. Each of the last three has a Reset that puts
+the shipped values back, taken from `content/defaults.ts` so what it restores is
+what an unconfigured site actually renders.
+
+Saved changes reach the public site on its next load: `applyTheme()` runs once in
+`main.tsx`, before the first render, for the same reason the copy is fetched
+there - components read `color` while rendering, and `global.css` reads the
+custom properties it writes.
 
 ### Images
 
@@ -171,6 +200,16 @@ rules, so any property that changes on hover must not also be set inline.
 
 ## Motion
 
-`prefers-reduced-motion` is honoured throughout: no smooth scroll, no drift in
-the particle field, no rolling headline, and the project track stacks instead of
-pinning.
+`prefers-reduced-motion` is honoured throughout: no smooth scroll, no rolling
+headline, a cursor that tracks without spinning, and the project track stacks
+instead of pinning.
+
+The pointer trail is the one place where honouring it is a decision rather than a
+rule, so the CMS makes the decision instead of the code: **Theme -> Reduced
+motion** chooses between keeping the nodes and taking the travel out of them
+(the default), showing the trail as set to everyone, or showing those visitors
+nothing. `lib/trail.ts` is told whether *this* visitor asked for less motion and
+reads the policy off the settings; `isCalm` and `isSilenced` are where the two
+meet. The CMS preview is given the same answer as the site, so an editor on a
+reduce-motion machine is not quietly previewing something other than what they
+ship.

@@ -208,6 +208,57 @@ export type ContactRow = {
   place: string;
 };
 
+/**
+ * The theme table, column for column.
+ *
+ * The site reads a grouped version of this from `GET /api/content`; the CMS
+ * edits the flat row, which is what the singleton endpoint speaks.
+ */
+export type ThemeRow = {
+  id: number;
+  preset: string;
+
+  color_bg: string;
+  color_surface: string;
+  color_border: string;
+  color_text: string;
+  color_muted: string;
+  color_accent: string;
+  color_accent_alt: string;
+
+  cursor_style: 'reticle' | 'ring' | 'dot' | 'crosshair' | 'halo' | 'native';
+  cursor_size: number;
+  cursor_spin: boolean;
+
+  trail_enabled: boolean;
+  trail_particle: 'dot' | 'ring' | 'square' | 'spark' | 'plus' | 'diamond';
+  trail_links: boolean;
+  trail_link_distance: number;
+  trail_threads: boolean;
+  trail_motion: 'follow' | 'opposite' | 'random' | 'outward' | 'inward' | 'still';
+  trail_speed: number;
+  trail_life: number;
+  trail_opacity: number;
+  trail_size: number;
+  trail_density: number;
+  trail_color: 'theme' | 'accent' | 'accent-alt' | 'white' | 'muted';
+  trail_swirl: number;
+  trail_repel: number;
+  trail_burst: boolean;
+};
+
+/**
+ * A saved pointer setup: the `cursor_*` and `trail_*` half of `ThemeRow`, under
+ * a name. Not the palette — colours have their own presets.
+ */
+export type ThemeTemplateRow = {
+  id: number;
+  name: string;
+  note: string;
+  settings: Partial<ThemeRow>;
+  position: number;
+};
+
 export type AskRow = {
   id: number;
   placeholder: string;
@@ -313,6 +364,8 @@ export const api = {
   about: singleton<AboutRow>('about'),
   contact: singleton<ContactRow>('contact'),
   ask: singleton<AskRow>('ask'),
+  theme: singleton<ThemeRow>('theme'),
+  themeTemplates: collection<ThemeTemplateRow>('theme-templates'),
   ai: {
     get: () => send<AiSettingsRow>('GET', '/api/admin/ai'),
     update: (payload: Partial<AiSettingsRow>) =>

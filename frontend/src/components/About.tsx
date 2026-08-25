@@ -44,7 +44,7 @@ export function About() {
                   position: 'absolute',
                   inset: '-40%',
                   background:
-                    'conic-gradient(from 0deg, transparent 0deg, #7B68FA 120deg, #45D9EF 220deg, transparent 320deg)',
+                    `conic-gradient(from 0deg, transparent 0deg, ${color.accent} 120deg, ${color.accentAlt} 220deg, transparent 320deg)`,
                   animation: 'ringspin 14s linear infinite',
                 }}
               />
@@ -59,7 +59,7 @@ export function About() {
                 inset: 0,
                 borderRadius: '50%',
                 overflow: 'hidden',
-                background: 'linear-gradient(160deg, #1E2228, #15181D)',
+                background: `linear-gradient(160deg, ${color.surface}, ${color.bg})`,
                 border: `1px solid ${color.border}`,
                 display: 'flex',
                 alignItems: 'center',

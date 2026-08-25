@@ -55,6 +55,135 @@ ABOUT = dict(
     ],
 )
 
+#: The palette and pointer the site ships with — "Graphite Violet" in the CMS.
+THEME = dict(
+    preset="graphite-violet",
+    color_bg="#15181D",
+    color_surface="#1E2228",
+    color_border="#2F353E",
+    color_text="#E9ECF0",
+    color_muted="#9AA2AD",
+    color_accent="#7B68FA",
+    color_accent_alt="#45D9EF",
+    cursor_style="reticle",
+    cursor_size=36,
+    cursor_spin=True,
+    trail_enabled=True,
+    trail_particle="dot",
+    trail_links=True,
+    trail_link_distance=112,
+    trail_threads=True,
+    trail_motion="follow",
+    trail_speed=100,
+    trail_life=1900,
+    trail_opacity=85,
+    trail_size=11,
+    trail_density=8,
+    trail_color="theme",
+    trail_swirl=40,
+    trail_repel=40,
+    trail_burst=True,
+    trail_reduced="calm",
+)
+
+def _pointer(**overrides) -> dict:
+    """A pointer template, stated as its difference from the shipped settings."""
+    base = {k: v for k, v in THEME.items() if k.startswith(("cursor_", "trail_"))}
+    base.update(overrides)
+    return base
+
+
+#: Starter templates, so the picker is useful before anyone has saved one.
+#: Each is a whole pointer setup — cursor and trail — and none of them touch the
+#: palette, so applying one never changes the site's colours.
+THEME_TEMPLATES = [
+    dict(
+        name="Comet",
+        note="The shipped feel, thrown harder. Dots that carry your hand's momentum.",
+        settings=_pointer(trail_speed=140),
+    ),
+    dict(
+        name="Constellation",
+        note="Nodes stay where you drop them and hold for four seconds, linking far. Draws a map of where you have been.",
+        settings=_pointer(
+            cursor_style="crosshair",
+            cursor_size=34,
+            trail_motion="still",
+            trail_speed=0,
+            trail_life=4000,
+            trail_opacity=60,
+            trail_size=5,
+            trail_density=26,
+            trail_link_distance=210,
+            trail_color="white",
+            trail_swirl=8,
+            trail_repel=10,
+        ),
+    ),
+    dict(
+        name="Whisper",
+        note="Barely there. A bare dot cursor and a short, dim trail with no links.",
+        settings=_pointer(
+            cursor_style="dot",
+            cursor_size=20,
+            cursor_spin=False,
+            trail_links=False,
+            trail_threads=False,
+            trail_speed=60,
+            trail_life=900,
+            trail_opacity=14,
+            trail_size=7,
+            trail_density=14,
+            trail_color="muted",
+            trail_swirl=15,
+            trail_repel=0,
+            trail_burst=False,
+        ),
+    ),
+    dict(
+        name="Circuitry",
+        note="Crosses on a tight grid of links. Technical, static, no glow.",
+        settings=_pointer(
+            cursor_style="ring",
+            cursor_size=30,
+            cursor_spin=False,
+            trail_particle="plus",
+            trail_threads=False,
+            trail_motion="still",
+            trail_speed=0,
+            trail_life=2600,
+            trail_opacity=45,
+            trail_size=8,
+            trail_density=22,
+            trail_link_distance=90,
+            trail_color="accent-alt",
+            trail_swirl=0,
+            trail_repel=0,
+        ),
+    ),
+    dict(
+        name="Embers",
+        note="Sparks blown outward from the cursor, wandering as they burn out.",
+        settings=_pointer(
+            cursor_style="halo",
+            cursor_size=44,
+            cursor_spin=False,
+            trail_particle="spark",
+            trail_links=False,
+            trail_threads=False,
+            trail_motion="outward",
+            trail_speed=120,
+            trail_life=1400,
+            trail_opacity=70,
+            trail_size=14,
+            trail_density=7,
+            trail_color="accent",
+            trail_swirl=70,
+            trail_repel=60,
+        ),
+    ),
+]
+
 CONTACT = dict(
     cta="Start a conversation",
     colophon="Built with React, GSAP, and too much coffee.",
@@ -337,6 +466,8 @@ CONTENT_MODELS = [
     models.NavItem,
     models.Section,
     models.AskSettings,
+    models.ThemeTemplate,
+    models.ThemeSettings,
     models.AboutContent,
     models.ContactContent,
     models.Profile,
@@ -369,7 +500,10 @@ def seed(db: Session, reset: bool = False) -> None:
         db.add(models.ContactContent(id=1, **CONTACT))
     if _empty(db, models.AskSettings):
         db.add(models.AskSettings(id=1, **ASK))
+    if _empty(db, models.ThemeSettings):
+        db.add(models.ThemeSettings(id=1, **THEME))
 
+    _seed_ordered(db, models.ThemeTemplate, THEME_TEMPLATES)
     _seed_ordered(db, models.Section, SECTIONS)
     _seed_ordered(db, models.NavItem, NAV)
     _seed_ordered(db, models.Stat, STATS)
