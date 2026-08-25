@@ -1,19 +1,8 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, type RefObject } from 'react';
 import { canHover, prefersReducedMotion } from '../lib/motion';
-
-export type Source = { tag: string; target: string };
-
-/** A source once the field has picked a node to represent it. */
-type ActiveNode = Source & { node: number | null };
 
 type Options = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
-  /** The answer panel — retrieval curves are drawn from lit nodes to its top edge. */
-  panelRef: RefObject<HTMLElement | null>;
-  /** Container of the absolutely-positioned source labels. */
-  labelsRef: RefObject<HTMLElement | null>;
-  /** Sources currently being cited. Changing this re-lights the field. */
-  sources: Source[];
 };
 
 const NODE_RADIUS = 1.5;
@@ -22,19 +11,12 @@ const MOUSE_R = 230;
 
 /**
  * Particle field behind the hero: nodes drift, link to nearby neighbours, and
- * push away from the pointer. When the ask bar cites sources, a few nodes light
- * up and draw bezier curves down to the answer panel.
+ * push away from the pointer.
  *
  * Neighbour search uses a spatial hash and batches links into three alpha
  * buckets, so a frame issues three strokes rather than one per line.
  */
-export function useVectorField({ canvasRef, panelRef, labelsRef, sources }: Options) {
-  const activeRef = useRef<ActiveNode[]>([]);
-  const apiRef = useRef<{
-    assignNodes: () => void;
-    hideLabels: () => void;
-  } | null>(null);
-
+export function useVectorField({ canvasRef }: Options) {
   useEffect(() => {
     const cv = canvasRef.current;
     if (!cv) return;
@@ -51,7 +33,6 @@ export function useVectorField({ canvasRef, panelRef, labelsRef, sources }: Opti
     const y = new Float32Array(N);
     const vx = new Float32Array(N);
     const vy = new Float32Array(N);
-    const lit = new Float32Array(N);
     const mouse = { x: -9999, y: -9999 };
     let grad: CanvasGradient | null = null;
 
@@ -198,94 +179,16 @@ export function useVectorField({ canvasRef, panelRef, labelsRef, sources }: Opti
       }
 
       ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(154,162,173,0.42)';
       for (let i = 0; i < N; i++) {
-        if (lit[i]) continue;
-        ctx.fillStyle = 'rgba(154,162,173,0.42)';
         ctx.beginPath();
         ctx.arc(x[i], y[i], NODE_RADIUS, 0, 6.2832);
         ctx.fill();
-      }
-
-      // Retrieval highlight: lit nodes, plus curves down to the answer panel.
-      const active = activeRef.current;
-      if (active.length) {
-        const panel = panelRef.current;
-        let px = w / 2;
-        let py = h / 2;
-        if (panel && panel.offsetHeight > 8) {
-          const pr = panel.getBoundingClientRect();
-          const cr = cv.getBoundingClientRect();
-          px = pr.left + pr.width / 2 - cr.left;
-          py = pr.top - cr.top;
-        }
-        const box = labelsRef.current;
-        active.forEach((a, k) => {
-          if (a.node == null) return;
-          const nx = x[a.node];
-          const ny = y[a.node];
-          ctx.strokeStyle = 'rgba(123,104,250,0.55)';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(nx, ny);
-          ctx.bezierCurveTo(nx, (ny + py) / 2, px, (ny + py) / 2, px, py);
-          ctx.stroke();
-          ctx.fillStyle = '#7B68FA';
-          ctx.beginPath();
-          ctx.arc(nx, ny, 3.4, 0, 6.2832);
-          ctx.fill();
-          ctx.strokeStyle = 'rgba(123,104,250,0.35)';
-          ctx.beginPath();
-          ctx.arc(nx, ny, 9, 0, 6.2832);
-          ctx.stroke();
-          if (box) {
-            const btn = box.querySelector<HTMLElement>(`[data-srclabel="${k}"]`);
-            if (btn) {
-              btn.style.display = 'flex';
-              btn.style.transform = `translate(${nx + 14}px,${ny - 10}px)`;
-            }
-          }
-        });
       }
     };
 
     // Static path: no autonomous drift, but the field still answers the pointer.
     const staticMode = reduced || window.innerWidth < 760;
-
-    apiRef.current = {
-      assignNodes: () => {
-        const picks: number[] = [];
-        const wanted = activeRef.current.length;
-        // Prefer nodes inside the safe area so labels don't hang off the edge.
-        let guard = 0;
-        while (picks.length < wanted && guard++ < N * 40) {
-          const i = Math.floor(Math.random() * N);
-          if (
-            picks.indexOf(i) === -1 &&
-            x[i] > w * 0.08 &&
-            x[i] < w * 0.92 &&
-            y[i] > 60 &&
-            y[i] < h - 60
-          ) {
-            picks.push(i);
-          }
-        }
-        lit.fill(0);
-        activeRef.current.forEach((a, k) => {
-          a.node = picks[k] ?? null;
-          if (a.node != null) lit[a.node] = 1;
-        });
-        // The animated path repaints on its own; the static one has to be told.
-        if (staticMode) drawFrame(false);
-      },
-      hideLabels: () => {
-        lit.fill(0);
-        const box = labelsRef.current;
-        box?.querySelectorAll<HTMLElement>('[data-srclabel]').forEach((b) => {
-          b.style.display = 'none';
-        });
-        if (staticMode) drawFrame(false);
-      },
-    };
 
     let raf = 0;
     let io: IntersectionObserver | null = null;
@@ -348,18 +251,6 @@ export function useVectorField({ canvasRef, panelRef, labelsRef, sources }: Opti
         host?.removeEventListener('pointermove', queueNudge);
         host?.removeEventListener('pointerleave', queueNudge);
       }
-      apiRef.current = null;
     };
-  }, [canvasRef, panelRef, labelsRef]);
-
-  // Re-light the field whenever the cited sources change.
-  useEffect(() => {
-    if (sources.length) {
-      activeRef.current = sources.map((s) => ({ ...s, node: null }));
-      apiRef.current?.assignNodes();
-    } else {
-      activeRef.current = [];
-      apiRef.current?.hideLabels();
-    }
-  }, [sources]);
+  }, [canvasRef]);
 }

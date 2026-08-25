@@ -1,0 +1,300 @@
+/* CMS chrome.
+   Only what inline styles genuinely cannot express: hover, focus, placeholder,
+   scrollbars, and the two keyframes. Everything positional stays inline next to
+   the markup it belongs to, the same way the portfolio is written. */
+
+.cms {
+  --bg: #15181d;
+  --surface: #1e2228;
+  --raised: #232830;
+  --border: #2f353e;
+  --text: #e9ecf0;
+  --muted: #9aa2ad;
+  --violet: #7b68fa;
+  --cyan: #45d9ef;
+  --danger: #ff6b6b;
+  --ok: #4ade80;
+
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Satoshi', system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.cms *,
+.cms *::before,
+.cms *::after {
+  box-sizing: border-box;
+}
+
+.cms-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* --- controls ------------------------------------------------------------ */
+
+.cms-input,
+.cms-textarea,
+.cms-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.cms-textarea {
+  resize: vertical;
+  min-height: 84px;
+}
+
+.cms-input:hover,
+.cms-textarea:hover,
+.cms-select:hover {
+  border-color: #3c434e;
+}
+
+.cms-input:focus,
+.cms-textarea:focus,
+.cms-select:focus {
+  outline: none;
+  border-color: var(--violet);
+  background: var(--surface);
+}
+
+.cms-input::placeholder,
+.cms-textarea::placeholder {
+  color: #667080;
+}
+
+.cms-input:disabled,
+.cms-textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.cms-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, #9aa2ad 50%),
+    linear-gradient(135deg, #9aa2ad 50%, transparent 50%);
+  background-position:
+    calc(100% - 17px) calc(50% + 1px),
+    calc(100% - 12px) calc(50% + 1px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+}
+
+.cms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    color 0.15s,
+    opacity 0.15s;
+}
+
+.cms-btn:hover:not(:disabled) {
+  border-color: #4a525f;
+  background: var(--raised);
+}
+
+.cms-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cms-btn[data-variant='primary'] {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--violet), var(--cyan));
+  color: #10131a;
+  font-weight: 600;
+}
+
+.cms-btn[data-variant='primary']:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.cms-btn[data-variant='ghost'] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.cms-btn[data-variant='ghost']:hover:not(:disabled) {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.cms-btn[data-variant='danger'] {
+  border-color: rgba(255, 107, 107, 0.35);
+  color: var(--danger);
+  background: transparent;
+}
+
+.cms-btn[data-variant='danger']:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.1);
+  border-color: var(--danger);
+}
+
+.cms-btn[data-size='sm'] {
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+.cms-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.cms-icon-btn:hover:not(:disabled) {
+  background: var(--raised);
+  color: var(--text);
+}
+
+.cms-icon-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cms :focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* --- navigation ---------------------------------------------------------- */
+
+.cms-navlink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 4px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: 13px;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+
+.cms-navlink:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.cms-navlink[data-active='true'] {
+  color: var(--text);
+  background: var(--surface);
+  border-left-color: var(--violet);
+}
+
+/* --- editable rows ------------------------------------------------------- */
+
+.cms-row {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+
+.cms-row:hover {
+  border-color: #3c434e;
+}
+
+.cms-row[data-open='true'] {
+  border-color: #454d59;
+}
+
+.cms-row-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 14px;
+  background: none;
+  border: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* --- feedback ------------------------------------------------------------ */
+
+@keyframes cms-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cms-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cms-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: cms-spin 0.7s linear infinite;
+}
+
+.cms-toast {
+  animation: cms-fade-up 0.2s ease-out;
+}

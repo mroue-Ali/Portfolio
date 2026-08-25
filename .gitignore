@@ -13,3 +13,6 @@ coverage/
 *.log
 .DS_Store
 CLAUDE.md
+
+# Uploaded images live with the server that serves them.
+backend/media/

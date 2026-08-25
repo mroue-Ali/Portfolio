@@ -135,16 +135,51 @@ export function useSiteAnimations() {
         });
       });
 
+      // ---------- stack marquee ----------
+      // Driven here rather than by a CSS keyframe: the reduced-motion block in
+      // global.css clamps every animation-duration with !important, which froze
+      // the band outright. GSAP lets us opt out deliberately instead.
+      if (!reduced) {
+        gsap.utils.toArray<HTMLElement>('[data-marquee]').forEach((row) => {
+          const seconds = Number(row.getAttribute('data-marquee-seconds')) || 30;
+          const toLeft = row.getAttribute('data-marquee') === 'left';
+          // The row holds two identical groups, so half its width is one full
+          // loop. Starting the rightward row at -50% keeps it filled on screen.
+          gsap.fromTo(
+            row,
+            { xPercent: toLeft ? 0 : -50 },
+            {
+              xPercent: toLeft ? -50 : 0,
+              duration: seconds,
+              ease: 'none',
+              repeat: -1,
+            },
+          );
+        });
+      }
+
       // ---------- projects ----------
       const track = document.querySelector<HTMLElement>('[data-track]');
       const pinWrap = document.querySelector<HTMLElement>('[data-pin]');
       const canPin = window.innerWidth >= PIN_MIN_WIDTH && !reduced;
 
+      /** Screenshot entrance, shared by the pinned and stacked layouts. */
+      const revealShot = (shot: HTMLElement, trigger: ScrollTrigger.Vars) =>
+        gsap.from(shot, {
+          autoAlpha: 0,
+          scale: 0.9,
+          xPercent: 6,
+          duration: 0.85,
+          // Slight overshoot so it reads as a pop rather than a fade.
+          ease: 'back.out(1.4)',
+          scrollTrigger: { trigger: shot, once: true, ...trigger },
+        });
+
       if (track && pinWrap && canPin) {
         // Scroll distance needed to bring the last card fully into view.
         const dist = () =>
           Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.12);
-        gsap.to(track, {
+        const horizontal = gsap.to(track, {
           x: () => -dist(),
           ease: 'none',
           scrollTrigger: {
@@ -161,6 +196,12 @@ export function useSiteAnimations() {
             refreshPriority: 1,
           },
         });
+
+        // Cards travel sideways rather than down the page, so their screenshots
+        // are triggered off the horizontal tween instead of the window scroll.
+        gsap.utils.toArray<HTMLElement>('[data-shot]', track).forEach((shot) => {
+          revealShot(shot, { containerAnimation: horizontal, start: 'left 88%' });
+        });
       } else if (track) {
         // Stacked layout comes from CSS; just reveal each card on the way past.
         gsap.utils.toArray<HTMLElement>('[data-card]', track).forEach((card) => {
@@ -172,6 +213,12 @@ export function useSiteAnimations() {
             scrollTrigger: { trigger: card, start: 'top 85%', once: true },
           });
         });
+
+        if (!reduced) {
+          gsap.utils.toArray<HTMLElement>('[data-shot]', track).forEach((shot) => {
+            revealShot(shot, { start: 'top 88%' });
+          });
+        }
       }
 
       // ---------- experience timeline ----------

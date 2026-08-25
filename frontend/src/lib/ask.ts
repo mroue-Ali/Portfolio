@@ -1,18 +1,14 @@
-import { answers, ask as askConfig, SOURCE_NODES } from '../content';
-import type { Source } from '../hooks/useVectorField';
-
-export type Resolved = { answer: string; sources: Source[] };
-
-const toSources = (indices: readonly number[]): Source[] =>
-  indices.map((i) => SOURCE_NODES[i]).filter(Boolean).map((n) => ({ ...n }));
+import { answers, ask as askConfig } from '../content';
 
 /**
  * Keyword matcher over the written answers.
  *
  * An exact question match wins outright; otherwise each matched keyword scores
- * its own length, so a specific term outweighs a generic one.
+ * its own length, so a specific term outweighs a generic one. Deliberately the
+ * same scoring as `backend/app/ask.py`, so an offline visitor and a visitor the
+ * backend cannot answer for get the same reply.
  */
-export function pickCanned(text: string): Resolved {
+export function pickCanned(text: string): string {
   const q = (text || '').toLowerCase().trim();
   let best: (typeof answers)[number] | null = null;
   let bestScore = 0;
@@ -32,56 +28,99 @@ export function pickCanned(text: string): Resolved {
     }
   }
 
-  if (!best) {
-    return { answer: askConfig.fallback, sources: toSources(askConfig.fallbackSources) };
-  }
-  return { answer: best.answer, sources: toSources(best.sources) };
+  return best ? best.answer : askConfig.fallback;
 }
 
-/** Set VITE_ASK_API to point the bar at a real retrieval endpoint. */
+/** Set VITE_ASK_API to point the bar at the backend. */
 const ASK_API = import.meta.env.VITE_ASK_API as string | undefined;
 
+/** The streaming sibling of whatever VITE_ASK_API points at. */
+const STREAM_API = ASK_API ? `${ASK_API.replace(/\/+$/, '')}/stream` : undefined;
+
+/** How long to wait for the *first* chunk. Cleared once text starts arriving. */
+const FIRST_CHUNK_TIMEOUT = 20_000;
+
 /**
- * Resolves a question, preferring the retrieval backend when one is configured.
+ * Streams an answer, calling `onChunk` with each piece as it arrives.
  *
- * Any failure — no endpoint, network, timeout, malformed body — falls back to
- * the written answers, so the bar always responds.
+ * Resolves when the answer is complete. Any failure before the first chunk —
+ * no endpoint, network, timeout, a non-200 — falls back to the written answers
+ * and emits them in one piece, so the bar always responds.
+ *
+ * A failure *after* the first chunk cannot fall back: the visitor is already
+ * reading. It resolves with whatever arrived rather than replacing a half
+ * answer with a different one, which is also what the backend does.
  */
-export async function resolveAnswer(question: string): Promise<Resolved> {
-  if (!ASK_API) return pickCanned(question);
+export async function streamAnswer(
+  question: string,
+  onChunk: (text: string) => void,
+  signal?: AbortSignal,
+): Promise<void> {
+  if (!STREAM_API) {
+    onChunk(pickCanned(question));
+    return;
+  }
+
+  let started = false;
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener('abort', abort);
+  // Only guards the wait for the first byte; a long answer is not a stall.
+  let timer: number | undefined = window.setTimeout(abort, FIRST_CHUNK_TIMEOUT);
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12_000);
-    const res = await fetch(ASK_API, {
+    const res = await fetch(STREAM_API, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ question }),
       signal: controller.signal,
     });
-    clearTimeout(timeout);
-    if (!res.ok) return pickCanned(question);
+    if (!res.ok || !res.body) throw new Error(`ask: HTTP ${res.status}`);
 
-    const data: unknown = await res.json();
-    const answer =
-      typeof data === 'object' && data && 'answer' in data ? String(data.answer ?? '') : '';
-    if (!answer.trim()) return pickCanned(question);
+    const reader = res.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buffer = '';
 
-    // Backend returns source tags; map them onto the nodes the canvas knows.
-    const tags =
-      typeof data === 'object' && data && 'sources' in data && Array.isArray(data.sources)
-        ? (data.sources as unknown[]).map(String)
-        : [];
-    const sources = tags
-      .map((tag) => SOURCE_NODES.find((n) => n.tag === tag))
-      .filter((n): n is (typeof SOURCE_NODES)[number] => Boolean(n))
-      .map((n) => ({ ...n }));
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += value;
 
-    return {
-      answer,
-      sources: sources.length ? sources : toSources(askConfig.fallbackSources),
-    };
-  } catch {
-    return pickCanned(question);
+      // SSE frames are separated by a blank line; anything after the last one
+      // is a partial frame that needs the next read before it can be parsed.
+      const frames = buffer.split('\n\n');
+      buffer = frames.pop() ?? '';
+
+      for (const frame of frames) {
+        const event = /^event:\s*(.+)$/m.exec(frame)?.[1]?.trim();
+        const data = /^data:\s*(.+)$/m.exec(frame)?.[1];
+        if (event === 'done') return;
+        if (event !== 'delta' || !data) continue;
+
+        let text = '';
+        try {
+          text = JSON.parse(data).text ?? '';
+        } catch {
+          continue;
+        }
+        if (!text) continue;
+
+        if (!started) {
+          started = true;
+          window.clearTimeout(timer);
+          timer = undefined;
+        }
+        onChunk(text);
+      }
+    }
+  } catch (err) {
+    // Deliberate close from the caller — not a failure, and not ours to answer.
+    if (signal?.aborted) return;
+    if (started) return;
+    onChunk(pickCanned(question));
+  } finally {
+    if (timer !== undefined) window.clearTimeout(timer);
+    signal?.removeEventListener('abort', abort);
   }
+
+  if (!started) onChunk(pickCanned(question));
 }

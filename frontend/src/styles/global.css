@@ -55,24 +55,6 @@ input {
   }
 }
 
-@keyframes mq-a {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
-@keyframes mq-b {
-  from {
-    transform: translate3d(-50%, 0, 0);
-  }
-  to {
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 @keyframes caretblink {
   0%,
   49% {
@@ -145,33 +127,6 @@ input {
   color: #e9ecf0;
 }
 
-/* Source pills under the answer, and the labels pinned to canvas nodes. */
-.source-pill {
-  border: 1px solid rgba(123, 104, 250, 0.4);
-  color: #9aa2ad;
-  transition:
-    border-color 0.25s,
-    color 0.25s;
-}
-
-.source-pill:hover {
-  border-color: #45d9ef;
-  color: #45d9ef;
-}
-
-.source-label {
-  border: 1px solid rgba(123, 104, 250, 0.55);
-  color: #e9ecf0;
-  transition:
-    border-color 0.25s,
-    color 0.25s;
-}
-
-.source-label:hover {
-  border-color: #45d9ef;
-  color: #45d9ef;
-}
-
 /* ---------- stack ---------- */
 
 /* --brand is set per tile from content data. */
@@ -200,22 +155,154 @@ input {
   color: var(--brand);
 }
 
-.tile-tip {
-  opacity: 0;
-  transition: opacity 0.25s;
+/* ---------- stack marquee ---------- */
+
+/* Decorative icon band under the toolkit grid. Purely background, so it never
+   takes pointer events away from the section above it. */
+.mq-stage {
+  margin-top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  pointer-events: none;
+  user-select: none;
 }
 
-.tile:hover .tile-tip {
-  opacity: 1;
+.mq-viewport {
+  overflow: hidden;
+  /* Feathered edges so icons slide in and out instead of popping at the cut. */
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
 }
 
-.marquee:hover {
-  animation-play-state: paused;
+/* Position/scale only — the slide itself is a GSAP tween on [data-marquee],
+   so it survives the reduced-motion animation-duration override below. */
+.marquee {
+  display: flex;
+  width: max-content;
+  opacity: 0.14;
+  will-change: transform;
+}
+
+/* Two identical groups make up the track, so -50% lands exactly one group over.
+   The trailing padding keeps the gap even across the wrap point. */
+.mq-group {
+  display: flex;
+  flex: none;
+  gap: 74px;
+  padding-right: 74px;
 }
 
 /* ---------- projects ---------- */
 
-/* Below the pin breakpoint the horizontal track becomes a plain column.
+/* Each entry is one anchor wrapping a text panel and its screenshot, so the
+   global a:hover colour has to be undone or every line inside would go cyan. */
+.project-card {
+  color: #e9ecf0;
+}
+
+.project-panel {
+  border: 1px solid #2f353e;
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.45s;
+}
+
+.project-card:hover .project-panel,
+.project-card:focus-visible .project-panel {
+  transform: translateY(-6px);
+  border-color: #7b68fa;
+}
+
+/* Takes the width the panel leaves; min-width:0 stops flex from letting the
+   image push the pair wider than the track allows. */
+.project-shot {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #2f353e;
+  border-radius: 4px;
+  overflow: hidden;
+  background:
+    linear-gradient(160deg, #22272e, #15181d),
+    repeating-linear-gradient(45deg, #1e2228 0 12px, #191d23 12px 24px);
+  transition:
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.45s;
+  will-change: transform, opacity;
+}
+
+.project-card:hover .project-shot,
+.project-card:focus-visible .project-shot {
+  transform: translateY(-6px);
+  border-color: #7b68fa;
+}
+
+.shot-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .shot-img {
+  transform: scale(1.03);
+}
+
+/* Sits over the image bottom-left; also names the slot while it is empty. */
+.shot-caption {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 6px 11px;
+  border: 1px solid #2f353e;
+  border-radius: 3px;
+  background: rgba(21, 24, 29, 0.72);
+  backdrop-filter: blur(6px);
+  color: #9aa2ad;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.card-cta {
+  color: #9aa2ad;
+  transition: color 0.3s;
+}
+
+.card-cta-arrow {
+  color: #45d9ef;
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.project-card:hover .card-cta,
+.project-card:focus-visible .card-cta {
+  color: #e9ecf0;
+}
+
+.project-card:hover .card-cta-arrow,
+.project-card:focus-visible .card-cta-arrow {
+  transform: translateX(6px);
+}
+
+/* Below the pin breakpoint the horizontal track becomes a plain column, and
+   each pair stacks: panel first, screenshot under it at a fixed ratio.
    Kept in CSS so it matches the breakpoint useSiteAnimations checks. */
 @media (max-width: 899px) {
   [data-track] {
@@ -225,6 +312,16 @@ input {
 
   [data-track] [data-card] {
     width: 100%;
+    flex-direction: column;
+  }
+
+  .project-panel {
+    flex: none;
+  }
+
+  .project-shot {
+    flex: none;
+    aspect-ratio: 16 / 10;
   }
 }
 
@@ -236,6 +333,16 @@ input {
 
   [data-track] [data-card] {
     width: 100%;
+    flex-direction: column;
+  }
+
+  .project-panel {
+    flex: none;
+  }
+
+  .project-shot {
+    flex: none;
+    aspect-ratio: 16 / 10;
   }
 }
 

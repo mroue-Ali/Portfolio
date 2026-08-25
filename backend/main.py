@@ -1,17 +1,8 @@
-from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
+"""Entry point: `uvicorn main:app --reload` from backend/.
 
-load_dotenv()
+The application itself lives in app/main.py; this keeps the run command short.
+"""
 
-app = FastAPI(title=os.getenv("APP_NAME", "portfolio"))
+from app.main import app
 
-
-@app.get("/")
-async def root():
-    return {"status": "ok", "app": os.getenv("APP_NAME", "portfolio")}
-
-
-@app.get("/health")
-async def health():
-    return {"db": os.getenv("DATABASE_URL", "not-configured")}
+__all__ = ["app"]

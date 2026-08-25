@@ -1,10 +1,12 @@
 import gsap from 'gsap';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { answers, ask as askConfig, profile } from '../content';
-import { useVectorField, type Source } from '../hooks/useVectorField';
-import { resolveAnswer } from '../lib/ask';
+import { Editable } from '../live/Editable';
+import { edit } from '../live/bindings';
+import { useEditMode } from '../live/mode';
+import { useVectorField } from '../hooks/useVectorField';
+import { streamAnswer } from '../lib/ask';
 import { prefersReducedMotion } from '../lib/motion';
-import { scrollToSection } from '../lib/scroll';
 import { color, font, gradient, textGradient } from '../theme';
 
 const monoMeta = {
@@ -15,16 +17,25 @@ const monoMeta = {
   color: color.muted,
 };
 
+/** The headline's type, shared by the animated and the editable version. */
+const heroName = {
+  margin: 0,
+  fontFamily: font.display,
+  fontWeight: 600,
+  fontSize: 'clamp(54px, 10.5vw, 120px)',
+  lineHeight: 0.94,
+  letterSpacing: '-0.03em',
+} as const;
+
 export function Hero() {
+  const editing = useEditMode();
   const [query, setQuery] = useState('');
   const [asked, setAsked] = useState('');
   const [streamed, setStreamed] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [used, setUsed] = useState(0);
-  const [sources, setSources] = useState<Source[]>([]);
 
   const canvasEl = useRef<HTMLCanvasElement>(null);
-  const nodeLabels = useRef<HTMLDivElement>(null);
   const heroText = useRef<HTMLDivElement>(null);
   const chipRow = useRef<HTMLDivElement>(null);
   const answerPanel = useRef<HTMLDivElement>(null);
@@ -33,16 +44,16 @@ export function Hero() {
   const rollWrap = useRef<HTMLSpanElement>(null);
   const rollInner = useRef<HTMLSpanElement>(null);
 
-  const streamTimer = useRef<number | null>(null);
+  /** Aborts the in-flight answer when the panel closes or a new one starts. */
+  const inFlight = useRef<AbortController | null>(null);
   const openRef = useRef(false);
   const usedRef = useRef(0);
 
-  useVectorField({ canvasRef: canvasEl, panelRef: answerPanel, labelsRef: nodeLabels, sources });
+  useVectorField({ canvasRef: canvasEl });
 
   const close = useCallback(() => {
-    if (streamTimer.current) window.clearInterval(streamTimer.current);
+    inFlight.current?.abort();
     openRef.current = false;
-    setSources([]);
 
     const panel = answerPanel.current;
     if (panel && !prefersReducedMotion()) {
@@ -73,7 +84,7 @@ export function Hero() {
       }
       if (usedRef.current >= askConfig.limit) return;
 
-      if (streamTimer.current) window.clearInterval(streamTimer.current);
+      inFlight.current?.abort();
       const reduced = prefersReducedMotion();
 
       openRef.current = true;
@@ -112,28 +123,44 @@ export function Hero() {
         panel.style.opacity = '1';
       }
 
-      const hit = await resolveAnswer(text);
-      // The panel may have been closed while the answer was in flight.
-      if (!openRef.current) return;
-      setSources(hit.sources);
+      const controller = new AbortController();
+      inFlight.current = controller;
 
-      if (reduced) {
-        setStreamed(hit.answer);
-        setStreaming(false);
-        return;
+      // Chunks arrive faster than a frame in bursts, so they are batched into
+      // one state update per paint. Appending per chunk would queue dozens of
+      // renders for text the eye sees as a single flush.
+      let pending = '';
+      let frame = 0;
+      const flush = () => {
+        frame = 0;
+        if (!pending) return;
+        const next = pending;
+        pending = '';
+        setStreamed((prev) => prev + next);
+      };
+
+      try {
+        await streamAnswer(
+          text,
+          (chunk) => {
+            // The panel may have been closed mid-answer.
+            if (!openRef.current) return;
+            if (reduced) {
+              // No typewriter to preserve: paint each chunk as it lands.
+              setStreamed((prev) => prev + chunk);
+              return;
+            }
+            pending += chunk;
+            if (!frame) frame = requestAnimationFrame(flush);
+          },
+          controller.signal,
+        );
+      } finally {
+        if (frame) cancelAnimationFrame(frame);
+        flush();
+        if (inFlight.current === controller) inFlight.current = null;
+        if (openRef.current) setStreaming(false);
       }
-
-      // Stream whole tokens, keeping whitespace so the text never reflows mid-word.
-      const tokens = hit.answer.split(/(\s+)/);
-      let i = 0;
-      streamTimer.current = window.setInterval(() => {
-        i += 1;
-        setStreamed(tokens.slice(0, i).join(''));
-        if (i >= tokens.length) {
-          if (streamTimer.current) window.clearInterval(streamTimer.current);
-          setStreaming(false);
-        }
-      }, 26);
     },
     [],
   );
@@ -147,12 +174,7 @@ export function Hero() {
     return () => window.removeEventListener('keydown', onKey);
   }, [close]);
 
-  useEffect(
-    () => () => {
-      if (streamTimer.current) window.clearInterval(streamTimer.current);
-    },
-    [],
-  );
+  useEffect(() => () => inFlight.current?.abort(), []);
 
   // Rolling speciality headline: the wrapper resizes to each line as it lands.
   useEffect(() => {
@@ -205,40 +227,6 @@ export function Hero() {
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
       />
 
-      {/* Labels pinned to lit nodes; positioned by the canvas draw loop. */}
-      <div ref={nodeLabels} style={{ position: 'absolute', inset: 0, zIndex: 4, pointerEvents: 'none' }}>
-        {sources.map((src, i) => (
-          <button
-            key={`${src.tag}-${i}`}
-            type="button"
-            className="source-label"
-            data-cursor="link"
-            data-srclabel={i}
-            onClick={() => scrollToSection(src.target)}
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-              display: 'none',
-              alignItems: 'center',
-              gap: 6,
-              padding: '4px 9px',
-              borderRadius: 3,
-              background: 'rgba(21,24,29,0.82)',
-              fontFamily: font.mono,
-              fontSize: 10,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              pointerEvents: 'auto',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span style={{ width: 4, height: 4, borderRadius: '50%', background: color.violet }} />
-            <span>{src.tag}</span>
-          </button>
-        ))}
-      </div>
 
       <div style={{ position: 'relative', zIndex: 5, width: '100%', maxWidth: 1180, margin: '0 auto' }}>
         <div ref={heroText} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
@@ -264,40 +252,41 @@ export function Hero() {
                 boxShadow: '0 0 10px rgba(69,217,239,0.9)',
               }}
             />
-            <span>{profile.availability}</span>
+            <Editable bind={edit.profile.availability()} />
           </div>
 
-          {/* Each glyph is masked by its own overflow box so it can slide up on load. */}
-          <h1
-            style={{
-              margin: 0,
-              fontFamily: font.display,
-              fontWeight: 600,
-              fontSize: 'clamp(54px, 10.5vw, 120px)',
-              lineHeight: 0.94,
-              letterSpacing: '-0.03em',
-              display: 'flex',
-              flexWrap: 'wrap',
-            }}
-          >
-            {[...profile.name].map((char, i) => (
-              <span
-                key={i}
-                style={{ display: 'inline-block', overflow: 'hidden', paddingBottom: '0.06em' }}
-              >
+          {/* Each glyph is masked by its own overflow box so it can slide up on
+              load — which also makes the headline impossible to type into. In
+              edit mode it collapses to a single editable heading: the intro
+              animation has played by then, and a name you can correct is worth
+              more than an animation you cannot see twice. */}
+          {editing ? (
+            <Editable
+              bind={edit.profile.name()}
+              as="h1"
+              style={{ ...heroName, ...textGradient(gradient.headline) }}
+            />
+          ) : (
+            <h1 style={{ ...heroName, display: 'flex', flexWrap: 'wrap' }}>
+              {[...profile.name].map((char, i) => (
                 <span
-                  data-hero-char
-                  style={
-                    char === ' '
-                      ? { display: 'inline-block', width: '0.28em' }
-                      : { display: 'inline-block', ...textGradient(gradient.headline) }
-                  }
+                  key={i}
+                  style={{ display: 'inline-block', overflow: 'hidden', paddingBottom: '0.06em' }}
                 >
-                  {char === ' ' ? ' ' : char}
+                  <span
+                    data-hero-char
+                    style={
+                      char === ' '
+                        ? { display: 'inline-block', width: '0.28em' }
+                        : { display: 'inline-block', ...textGradient(gradient.headline) }
+                    }
+                  >
+                    {char === ' ' ? ' ' : char}
+                  </span>
                 </span>
-              </span>
-            ))}
-          </h1>
+              ))}
+            </h1>
+          )}
 
           <div
             data-hero-b
@@ -313,7 +302,7 @@ export function Hero() {
               lineHeight: 1.1,
             }}
           >
-            <span>{profile.role}</span>
+            <Editable bind={edit.profile.role()} />
             <span style={{ color: color.border }}>/</span>
             <span
               ref={rollWrap}
@@ -349,12 +338,12 @@ export function Hero() {
             </span>
           </div>
 
-          <p
-            data-hero-c
+          <Editable
+            bind={edit.profile.intro()}
+            as="p"
+            rest={{ 'data-hero-c': true }}
             style={{ margin: 0, maxWidth: 640, fontSize: 17, lineHeight: 1.65, color: color.muted }}
-          >
-            {profile.intro}
-          </p>
+          />
         </div>
 
         {/* ---------- ask bar ---------- */}
@@ -549,32 +538,6 @@ export function Hero() {
                 )}
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 18 }}>
-                {sources.map((src, i) => (
-                  <button
-                    key={`${src.tag}-${i}`}
-                    type="button"
-                    className="source-pill"
-                    data-cursor="link"
-                    onClick={() => scrollToSection(src.target)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 7,
-                      padding: '5px 10px',
-                      borderRadius: 3,
-                      background: 'transparent',
-                      fontFamily: font.mono,
-                      fontSize: 10,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    <span>{src.tag}</span>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
         </div>

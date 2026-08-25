@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000">
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7B68FA"/><stop offset="1" stop-color="#45D9EF"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7B68FA" stop-opacity="0.20"/>
+      <stop offset="1" stop-color="#45D9EF" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="1000" fill="#15181D"/>
+
+  <rect x="0" y="0" width="1600" height="64" fill="#1E2228"/>
+  <line x1="0" y1="64" x2="1600" y2="64" stroke="#2F353E" stroke-width="2"/>
+  <circle cx="34" cy="32" r="7" fill="#3A414B"/>
+  <circle cx="60" cy="32" r="7" fill="#3A414B"/>
+  <circle cx="86" cy="32" r="7" fill="#3A414B"/>
+  <rect x="130" y="18" width="420" height="28" rx="14" fill="#15181D" stroke="#2F353E"/>
+  <text x="152" y="38" font-family="monospace" font-size="15" fill="#9AA2AD">app.local/ops/orders</text>
+
+  <rect x="0" y="64" width="220" height="936" fill="#1E2228"/>
+  <line x1="220" y1="64" x2="220" y2="1000" stroke="#2F353E" stroke-width="2"/>
+  <rect x="30" y="108" width="140" height="12" rx="6" fill="#2F353E"/><rect x="30" y="150" width="110" height="12" rx="6" fill="#2F353E"/><rect x="30" y="192" width="158" height="12" rx="6" fill="#2F353E"/><rect x="30" y="234" width="126" height="12" rx="6" fill="#2F353E"/><rect x="30" y="276" width="100" height="12" rx="6" fill="#2F353E"/>
+
+  <rect x="268" y="104" width="204" height="112" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <rect x="290" y="130" width="96" height="26" rx="4" fill="url(#brand)" opacity="0.55"/>
+  <rect x="290" y="172" width="140" height="11" rx="5" fill="#39414C"/>
+  <rect x="500" y="104" width="204" height="112" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <rect x="522" y="130" width="96" height="26" rx="4" fill="url(#brand)" opacity="0.55"/>
+  <rect x="522" y="172" width="140" height="11" rx="5" fill="#39414C"/>
+  <rect x="732" y="104" width="204" height="112" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <rect x="754" y="130" width="96" height="26" rx="4" fill="url(#brand)" opacity="0.55"/>
+  <rect x="754" y="172" width="140" height="11" rx="5" fill="#39414C"/>
+  <rect x="964" y="104" width="204" height="112" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <rect x="986" y="130" width="96" height="26" rx="4" fill="url(#brand)" opacity="0.55"/>
+  <rect x="986" y="172" width="140" height="11" rx="5" fill="#39414C"/>  <rect x="268" y="252" width="836" height="600" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <rect x="296" y="300" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="300" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="300" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="294" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="340" x2="1076" y2="340" stroke="#2F353E"/>
+  <rect x="296" y="372" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="372" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="372" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="366" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="412" x2="1076" y2="412" stroke="#2F353E"/>
+  <rect x="296" y="444" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="444" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="444" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="438" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="484" x2="1076" y2="484" stroke="#2F353E"/>
+  <rect x="296" y="516" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="516" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="516" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="510" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="556" x2="1076" y2="556" stroke="#2F353E"/>
+  <rect x="296" y="588" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="588" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="588" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="582" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="628" x2="1076" y2="628" stroke="#2F353E"/>
+  <rect x="296" y="660" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="660" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="660" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="654" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="700" x2="1076" y2="700" stroke="#2F353E"/>
+  <rect x="296" y="732" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="732" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="732" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="726" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="772" x2="1076" y2="772" stroke="#2F353E"/>
+  <rect x="296" y="804" width="120" height="12" rx="6" fill="#39414C"/>
+  <rect x="452" y="804" width="230" height="12" rx="6" fill="#333B45"/>
+  <rect x="720" y="804" width="150" height="12" rx="6" fill="#333B45"/>
+  <rect x="912" y="798" width="120" height="26" rx="13" fill="none" stroke="#45D9EF" stroke-opacity="0.35"/>
+  <line x1="296" y1="844" x2="1076" y2="844" stroke="#2F353E"/>
+  <rect x="1148" y="252" width="412" height="600" rx="6" fill="#1E2228" stroke="#2F353E"/>
+  <path d="M1190 560 L1268 448 L1352 500 L1436 388 L1518 430" fill="none"
+        stroke="url(#brand)" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="1190" cy="560" r="9" fill="#45D9EF"/><circle cx="1268" cy="448" r="7" fill="#7B68FA"/>
+  <circle cx="1352" cy="500" r="7" fill="#7B68FA"/><circle cx="1436" cy="388" r="7" fill="#7B68FA"/>
+  <circle cx="1518" cy="430" r="9" fill="#45D9EF"/>
+  <rect x="1180" y="640" width="300" height="11" rx="5" fill="#2F353E"/><rect x="1180" y="679" width="250" height="11" rx="5" fill="#2F353E"/><rect x="1180" y="718" width="320" height="11" rx="5" fill="#2F353E"/><rect x="1180" y="757" width="210" height="11" rx="5" fill="#2F353E"/>
+
+
+  <text x="800" y="946" text-anchor="middle" font-family="monospace"
+        font-size="26" letter-spacing="6" fill="#9AA2AD">Delivery Operations Platform</text>
+  <text x="800" y="980" text-anchor="middle" font-family="monospace"
+        font-size="17" letter-spacing="4" fill="#4A525D">PLACEHOLDER - REPLACE WITH REAL SCREENSHOT</text>
+</svg>

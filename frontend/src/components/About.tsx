@@ -1,4 +1,7 @@
-import { about } from '../content';
+import { about, assetUrl } from '../content';
+import { Editable } from '../live/Editable';
+import { ImageDrop } from '../live/ImageDrop';
+import { edit } from '../live/bindings';
 import { color, font, monoLabel, sectionHeading } from '../theme';
 
 export function About() {
@@ -64,29 +67,41 @@ export function About() {
                 willChange: 'transform',
               }}
             >
-              <span
-                style={{
-                  fontFamily: font.mono,
-                  fontSize: 11,
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  color: color.muted,
-                  textAlign: 'center',
-                  padding: '0 30px',
-                }}
-              >
-                {about.portraitPlaceholder}
-              </span>
+              {/* The placeholder is what the frame says until there is a
+                  portrait; once there is one it fills the circle. */}
+              {about.portraitImage ? (
+                <img
+                  src={assetUrl(about.portraitImage)}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              ) : (
+                <Editable
+                  bind={edit.about.portraitPlaceholder()}
+                  style={{
+                    fontFamily: font.mono,
+                    fontSize: 11,
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: color.muted,
+                    textAlign: 'center',
+                    padding: '0 30px',
+                  }}
+                />
+              )}
+              <ImageDrop bind={edit.about.portrait()} />
             </div>
           </div>
         </div>
 
         <div data-reveal style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
-          <div style={monoLabel}>{about.eyebrow}</div>
-          <h2 style={sectionHeading}>{about.heading}</h2>
-          {about.paragraphs.map((text, i) => (
-            <p
+          <Editable bind={edit.section('about', 'eyebrow')} as="div" style={monoLabel} />
+          <Editable bind={edit.section('about', 'heading')} as="h2" style={sectionHeading} />
+          {about.paragraphs.map((_, i) => (
+            <Editable
               key={i}
+              bind={edit.about.paragraph(i)}
+              as="p"
               style={{
                 margin: 0,
                 fontSize: 17,
@@ -94,9 +109,7 @@ export function About() {
                 color: color.muted,
                 maxWidth: '58ch',
               }}
-            >
-              {text}
-            </p>
+            />
           ))}
 
           <div
@@ -109,8 +122,8 @@ export function About() {
               borderTop: `1px solid ${color.border}`,
             }}
           >
-            {about.stats.map((stat) => (
-              <div key={stat.label} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {about.stats.map((stat, i) => (
+              <div key={stat.id ?? i} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <div
                   style={{
                     display: 'flex',
@@ -126,7 +139,9 @@ export function About() {
                     0
                   </span>
                 </div>
-                <div
+                <Editable
+                  bind={edit.about.statLabel(stat)}
+                  as="div"
                   style={{
                     fontFamily: font.mono,
                     fontSize: 11,
@@ -134,9 +149,7 @@ export function About() {
                     textTransform: 'uppercase',
                     color: color.muted,
                   }}
-                >
-                  {stat.label}
-                </div>
+                />
               </div>
             ))}
           </div>

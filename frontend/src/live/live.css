@@ -1,0 +1,84 @@
+/* Edit mode, on the portfolio itself.
+
+   Loaded with the edit layer, which only mounts for a signed-in user — a
+   visitor never downloads any of this. Everything keys off [data-editable],
+   which `<Editable>` only sets while edit mode is on, so read-only is not a
+   styling state to maintain: the rules simply don't match. */
+
+[data-editable] {
+  border-radius: 3px;
+  outline: 1px dashed rgba(123, 104, 250, 0.35);
+  outline-offset: 3px;
+  transition:
+    outline-color 0.15s,
+    background 0.15s;
+}
+
+[data-editable]:hover {
+  outline: 1px solid rgba(123, 104, 250, 0.8);
+  background: rgba(123, 104, 250, 0.08);
+}
+
+[data-editable]:focus,
+[data-editable][data-editing='true'] {
+  outline: 1px solid #45d9ef;
+  background: rgba(69, 217, 239, 0.09);
+}
+
+[data-editable][data-saving='true'] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+[data-editable][data-failed='true'] {
+  outline: 1px solid #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* The custom cursor follows [data-cursor] elements and would fight the caret. */
+html[data-edit-mode] [data-cursor] {
+  cursor: auto;
+}
+
+/* Also defined in cms.css, which only loads with the panel — the edit bar and
+   the image drop need it before that. */
+@keyframes cms-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cms-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #2f353e;
+  border-top-color: #45d9ef;
+  border-radius: 50%;
+  animation: cms-spin 0.7s linear infinite;
+}
+
+@keyframes live-slide-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.live-panel {
+  animation: live-slide-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.live-bar {
+  animation: live-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The panel is a CMS surface dropped onto the site, so it opts back into the
+   CMS's own scrollbar and spacing rather than the page's. */
+.live-panel .cms {
+  min-height: 0;
+  background: transparent;
+}

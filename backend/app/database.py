@@ -1,0 +1,29 @@
+"""Engine, session factory, and the declarative base every model shares."""
+
+from collections.abc import Iterator
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+
+from .config import settings
+
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,  # the container can drop idle connections
+    pool_recycle=3600,
+    future=True,
+)
+
+SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+def get_db() -> Iterator[Session]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

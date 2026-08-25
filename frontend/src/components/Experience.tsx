@@ -1,4 +1,6 @@
 import { experience } from '../content';
+import { Editable } from '../live/Editable';
+import { edit } from '../live/bindings';
 import { color, font, monoLabel, sectionHeading } from '../theme';
 
 export function Experience() {
@@ -17,8 +19,8 @@ export function Experience() {
           data-reveal
           style={{ display: 'flex', flexDirection: 'column', gap: 18, marginBottom: 76 }}
         >
-          <div style={monoLabel}>{experience.eyebrow}</div>
-          <h2 style={sectionHeading}>{experience.heading}</h2>
+          <Editable bind={edit.section('experience', 'eyebrow')} as="div" style={monoLabel} />
+          <Editable bind={edit.section('experience', 'heading')} as="h2" style={sectionHeading} />
         </div>
 
         <div data-timeline style={{ position: 'relative', paddingLeft: 42 }}>
@@ -50,8 +52,8 @@ export function Experience() {
           />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 62 }}>
-            {experience.roles.map((role) => (
-              <div key={role.title} data-entry style={{ position: 'relative' }}>
+            {experience.roles.map((role, i) => (
+              <div key={role.id ?? i} data-entry style={{ position: 'relative' }}>
                 <span
                   data-dot
                   aria-hidden="true"
@@ -67,7 +69,9 @@ export function Experience() {
                   }}
                 />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div
+                  <Editable
+                    bind={edit.role.period(role)}
+                    as="div"
                     style={{
                       fontFamily: font.mono,
                       fontSize: 11,
@@ -75,10 +79,10 @@ export function Experience() {
                       textTransform: 'uppercase',
                       color: color.cyan,
                     }}
-                  >
-                    {role.period}
-                  </div>
-                  <h3
+                  />
+                  <Editable
+                    bind={edit.role.title(role)}
+                    as="h3"
                     style={{
                       margin: 0,
                       fontFamily: font.display,
@@ -86,10 +90,10 @@ export function Experience() {
                       fontSize: 24,
                       letterSpacing: '-0.02em',
                     }}
-                  >
-                    {role.title}
-                  </h3>
-                  <p
+                  />
+                  <Editable
+                    bind={edit.role.body(role)}
+                    as="p"
                     style={{
                       margin: 0,
                       maxWidth: '66ch',
@@ -97,9 +101,7 @@ export function Experience() {
                       lineHeight: 1.65,
                       color: color.muted,
                     }}
-                  >
-                    {role.body}
-                  </p>
+                  />
                 </div>
               </div>
             ))}
@@ -122,8 +124,8 @@ export function Experience() {
             color: color.muted,
           }}
         >
-          {experience.footnotes.map((note) => (
-            <span key={note}>{note}</span>
+          {experience.footnotes.map((note, i) => (
+            <Editable key={note.id ?? i} bind={edit.footnote(note)} />
           ))}
         </div>
       </div>
