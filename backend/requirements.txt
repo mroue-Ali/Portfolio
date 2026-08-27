@@ -2,6 +2,9 @@ fastapi
 uvicorn[standard]
 python-dotenv
 pymysql
+# Nothing imports this: PyMySQL needs it to complete MySQL 8's default
+# caching_sha2_password handshake over a non-TLS connection.
+cryptography
 sqlalchemy
 alembic
 pyjwt

@@ -1,0 +1,8 @@
+* text=auto
+
+# These are consumed by Linux, whatever wrote them. A CRLF in a shebang line
+# turns `deploy.sh` into "bad interpreter: /usr/bin/env^M"; nginx and systemd
+# fail less loudly but no more usefully.
+*.sh        text eol=lf
+*.conf      text eol=lf
+*.service   text eol=lf

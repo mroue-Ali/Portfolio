@@ -1,0 +1,58 @@
+# /etc/systemd/system/portfolio-api.service
+#
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now portfolio-api
+#   systemctl status portfolio-api
+#   journalctl -u portfolio-api -f
+
+[Unit]
+Description=Portfolio content API (FastAPI/uvicorn)
+Documentation=file:///home/ali/apps/Portfolio/backend/README.md
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ali
+Group=ali
+
+# app/config.py calls load_dotenv() with no argument, which searches upward from
+# the working directory — so this is what makes backend/.env the config. There is
+# no EnvironmentFile= line for that reason; adding one would load the file twice.
+WorkingDirectory=/home/ali/apps/Portfolio/backend
+
+# 127.0.0.1 only. nginx is the single public entry point; binding 0.0.0.0 would
+# expose /docs and the admin routes on port 8000 to anyone who guessed the port,
+# with ufw the only thing in the way.
+ExecStart=/home/ali/apps/Portfolio/backend/venv/bin/uvicorn main:app \
+    --host 127.0.0.1 \
+    --port 8000 \
+    --workers 2 \
+    --proxy-headers \
+    --forwarded-allow-ips 127.0.0.1
+
+Restart=always
+RestartSec=3
+# Give up on a crash loop rather than hammering MySQL forever.
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+# Unbuffered, so journalctl shows a traceback the moment it happens.
+Environment=PYTHONUNBUFFERED=1
+
+# --- hardening -------------------------------------------------------------- #
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+
+# ProtectHome=read-only covers /home/ali, which is where both the code and the
+# uploads live. The code should be read-only; the upload directory must not be.
+# This is MEDIA_ROOT from backend/.env — keep the two in step.
+ReadWritePaths=/home/ali/apps/portfolio-media
+
+[Install]
+WantedBy=multi-user.target
