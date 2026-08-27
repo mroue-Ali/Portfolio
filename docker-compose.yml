@@ -1,7 +1,7 @@
 # The portfolio stack: MySQL and the API.
 #
 # nginx and certbot deliberately live on the host, not in here. nginx is the
-# shared entry point for every project on this server — coupling its lifecycle
+# shared entry point for every project on this server - coupling its lifecycle
 # to this one stack, and its certificates to a volume mount, buys nothing.
 #
 #   docker compose up -d          start
@@ -24,7 +24,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     # No `ports:` on purpose. The API reaches it over the compose network, so
-    # 3306 never touches the host at all — not even the loopback. Use
+    # 3306 never touches the host at all - not even the loopback. Use
     # `docker compose exec db mysql -uportfolio -p portfolio` for a shell.
     healthcheck:
       # What makes `depends_on: service_healthy` meaningful below. MySQL's first
@@ -46,17 +46,17 @@ services:
         condition: service_healthy
     # Published to the loopback only: nginx proxies here, nothing else can. The
     # container listens on 0.0.0.0 inside its own namespace, which is not the
-    # host's 0.0.0.0 — the bind address on the left is what matters.
+    # host's 0.0.0.0 - the bind address on the left is what matters.
     ports:
       - "127.0.0.1:8000:8000"
     volumes:
       # Uploads outlive the container. A bind mount rather than a named volume
       # so they are an ordinary directory you can back up, inspect, and rsync.
       - ${MEDIA_HOST_DIR:-/home/ali/apps/portfolio-media}:/data/media
-    # Runs as ali (uid 1000) so files written into the bind mount are owned by
-    # you rather than by a uid that exists only inside the container. Confirm
-    # with `id -u` on the server; change both numbers if it is not 1000.
-    user: "1000:1000"
+    # Runs as the host user, so files written into that bind mount are owned by
+    # you rather than by a uid that exists only inside the container. Set
+    # APP_UID/APP_GID in .env; they are not the same on every machine.
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status==200 else 1)"]
       interval: 30s
@@ -64,7 +64,7 @@ services:
       retries: 3
       start_period: 20s
 
-  # Not part of `up` — it builds the frontend and exits. Under a profile so it
+  # Not part of `up` - it builds the frontend and exits. Under a profile so it
   # only runs when asked:  docker compose --profile build run --rm frontend
   # This is why the host needs no Node.
   frontend:
@@ -75,7 +75,9 @@ services:
       - ./frontend:/app
     # node_modules stays in the bind mount, so a rebuild is incremental.
     command: sh -c "npm ci && npm run build"
-    user: "1000:1000"
+    # Same reason as the api service: build output lands in a bind mount, and
+    # root-owned node_modules is a nuisance to clean up.
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
 
 volumes:
   db-data:
