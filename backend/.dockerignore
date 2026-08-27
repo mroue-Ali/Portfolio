@@ -1,0 +1,16 @@
+# Secrets never enter an image. Compose supplies configuration as environment
+# at run time, so this file being absent from the build is the point.
+.env
+*.env
+!*.env.example
+
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Uploads are a bind mount at run time; baking a copy in would shadow it.
+media/
+
+.git/
+README.md

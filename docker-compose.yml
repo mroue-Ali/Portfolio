@@ -1,0 +1,81 @@
+# The portfolio stack: MySQL and the API.
+#
+# nginx and certbot deliberately live on the host, not in here. nginx is the
+# shared entry point for every project on this server — coupling its lifecycle
+# to this one stack, and its certificates to a volume mount, buys nothing.
+#
+#   docker compose up -d          start
+#   docker compose logs -f api    tail the API
+#   docker compose ps             what is running
+#
+# Configuration comes from `.env` beside this file. See deploy/env.example.
+
+name: portfolio
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set in .env}
+      MYSQL_DATABASE: ${DB_NAME:-portfolio}
+      MYSQL_USER: ${DB_USER:-portfolio}
+      MYSQL_PASSWORD: ${DB_PASS:?set in .env}
+    volumes:
+      - db-data:/var/lib/mysql
+    # No `ports:` on purpose. The API reaches it over the compose network, so
+    # 3306 never touches the host at all — not even the loopback. Use
+    # `docker compose exec db mysql -uportfolio -p portfolio` for a shell.
+    healthcheck:
+      # What makes `depends_on: service_healthy` meaningful below. MySQL's first
+      # boot builds the data directory and takes ~30s, and a container that has
+      # started is not a database that answers.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    # Published to the loopback only: nginx proxies here, nothing else can. The
+    # container listens on 0.0.0.0 inside its own namespace, which is not the
+    # host's 0.0.0.0 — the bind address on the left is what matters.
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # Uploads outlive the container. A bind mount rather than a named volume
+      # so they are an ordinary directory you can back up, inspect, and rsync.
+      - ${MEDIA_HOST_DIR:-/home/ali/apps/portfolio-media}:/data/media
+    # Runs as ali (uid 1000) so files written into the bind mount are owned by
+    # you rather than by a uid that exists only inside the container. Confirm
+    # with `id -u` on the server; change both numbers if it is not 1000.
+    user: "1000:1000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4).status==200 else 1)"]
+      interval: 30s
+      timeout: 6s
+      retries: 3
+      start_period: 20s
+
+  # Not part of `up` — it builds the frontend and exits. Under a profile so it
+  # only runs when asked:  docker compose --profile build run --rm frontend
+  # This is why the host needs no Node.
+  frontend:
+    profiles: ["build"]
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    # node_modules stays in the bind mount, so a rebuild is incremental.
+    command: sh -c "npm ci && npm run build"
+    user: "1000:1000"
+
+volumes:
+  db-data:
