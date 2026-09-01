@@ -216,14 +216,102 @@ A timeout or refusal is the correct result.
 
 ---
 
-## Later deploys
+## 8. Wiring up CI/CD
+
+One-time, and only after 1-7 are green. 8.1 and 8.2 run on the server
+(tethered); 8.3 runs from the laptop, where `gh` is already signed in.
+
+### 8.1 Let the deploy write the webroot without root
+
+`deploy.sh` used to `sudo rsync` into `/var/www`. An unattended deploy cannot
+type a sudo password, and passwordless root is a much larger grant than this
+needs — so the webroot simply belongs to `ali` now. nginx still reads it as
+`www-data` through the world-readable bits that `--chmod=D755,F644` pins.
+
+```bash
+sudo chown -R ali:ali /var/www/mroueali.com && sudo chmod 755 /var/www/mroueali.com
+```
+
+Prove it before CI depends on it — this must succeed with no password prompt:
 
 ```bash
 ~/apps/Portfolio/deploy/deploy.sh
 ```
 
-Pull, build, migrate, publish, restart, health-check. Exits non-zero and prints
-container logs if the API does not come back.
+### 8.2 A key that can only deploy
+
+Generate the pair on your laptop, then paste the **public** half here. The
+`command=` prefix is the point: this key runs `deploy.sh` and cannot do
+anything else — no shell, no file copy, no port forward. A leaked secret in
+GitHub buys an attacker one deploy of your own repo, not the server.
+
+```bash
+nano ~/.ssh/authorized_keys
+```
+
+Add it as a single line, public key and trailing comment included:
+
+```
+command="/home/ali/apps/Portfolio/deploy/deploy.sh",no-agent-forwarding,no-port-forwarding,no-pty,no-user-rc,no-X11-forwarding ssh-ed25519 AAAA...  github-actions
+```
+
+Your everyday key stays on its own line, unrestricted. Then read out the host
+key — GitHub pins it so the runner cannot be talked into handing the deploy key
+to an impostor on port 22:
+
+```bash
+echo "mroueali.com $(cut -d' ' -f1,2 /etc/ssh/ssh_host_ed25519_key.pub)"
+```
+
+### 8.3 The four secrets
+
+From the laptop, in the repo. `SSH_KEY` is the private half from 8.2,
+`SSH_KNOWN_HOSTS` is the line 8.2 printed.
+
+```bash
+gh secret list
+```
+
+All four must be present: `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `SSH_KNOWN_HOSTS`.
+
+### 8.4 What is deliberately not automated
+
+nginx config, certificates, `.env`, and `frontend/.env` are never touched by a
+deploy. They are server state, they hold secrets, and a bad automated edit to
+any of them takes the site down in a way a `git revert` cannot fix. Change
+those by hand, from this runbook.
+
+Rolling back is a git operation, because the deploy is:
+
+```bash
+git revert HEAD && git push
+```
+
+Migrations are the exception — `alembic upgrade head` does not un-apply itself.
+A revert that undoes a schema change needs a downgrade written for it.
+
+---
+
+## Later deploys
+
+Pushing to `main` deploys. GitHub Actions opens one SSH connection and the
+server runs `deploy.sh`: pull, build, migrate, publish, restart, health-check.
+A failed health check exits non-zero, prints container logs, and turns the
+Actions run red — so a broken deploy is visible without watching for it.
+
+The same script by hand, when you want to deploy without a commit:
+
+```bash
+~/apps/Portfolio/deploy/deploy.sh
+```
+
+Watch a run:
+
+```bash
+gh run watch
+```
+
+---
 
 ## When something is wrong
 

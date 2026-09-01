@@ -4,6 +4,11 @@
 #
 #   ~/apps/Portfolio/deploy/deploy.sh
 #
+# This is also what GitHub Actions runs on every push to main — the forced
+# command in authorized_keys points here, so CI and a hand-run deploy are
+# literally the same code path. That is why nothing below asks a question,
+# allocates a TTY, or calls sudo: a CI session has none of those.
+#
 # Needs no Python and no Node on the host — everything builds in a container.
 # Idempotent: safe to run when nothing has changed.
 
@@ -23,21 +28,23 @@ docker compose build api
 echo "==> Building the frontend"
 # A throwaway node container writing into ./frontend. Under the "build" profile
 # so `docker compose up` never tries to keep it running.
-docker compose --profile build run --rm frontend
+docker compose --profile build run --rm -T frontend
 
 echo "==> Database migrations"
 # `run` honours depends_on, so this waits for the db healthcheck before starting
 # and exits when alembic does. Alembic owns the schema (AUTO_CREATE_TABLES=0);
 # this is a no-op once the database is at head.
-docker compose run --rm api alembic upgrade head
+docker compose run --rm -T api alembic upgrade head
 
 echo "==> Starting services"
 docker compose up -d
 
 echo "==> Publishing static files"
 # --delete so a renamed hashed asset does not leave its predecessor behind.
-sudo rsync -a --delete "$REPO/frontend/dist/" "$WEBROOT/"
-sudo chown -R www-data:www-data "$WEBROOT"
+# No sudo: the webroot is owned by this user, and --chmod pins the modes nginx
+# needs — it reads as www-data through the "other" bits. Passwordless root for
+# an unattended deploy would be a far bigger grant than one owned directory.
+rsync -a --delete --chmod=D755,F644 "$REPO/frontend/dist/" "$WEBROOT/"
 
 # `up -d` returns as soon as the containers are created, which is before uvicorn
 # has bound its port. Poll the health endpoint instead — it round-trips to MySQL,

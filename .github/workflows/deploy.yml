@@ -1,0 +1,55 @@
+# Deploy mroueali.com on every push to main.
+#
+# The runner builds nothing. It opens one SSH connection to the VPS, and a
+# forced command in that key's authorized_keys entry runs deploy/deploy.sh —
+# so this key cannot open a shell even if the secret leaks. Everything the
+# deploy actually does lives in deploy/deploy.sh, which is still the script
+# you run by hand when you want to.
+#
+# Secrets: SSH_HOST, SSH_USER, SSH_KEY, SSH_KNOWN_HOSTS. Setup: deploy/RUNBOOK.md.
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+
+# One deploy at a time. A second push queues behind the first rather than
+# racing it through `git pull` and `rsync --delete`.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # The VPS builds the API image and the frontend bundle, which is minutes,
+    # not tens of minutes. A job still running at 20 is a job that is stuck.
+    timeout-minutes: 20
+    steps:
+      - name: Run the deploy over SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          set -euo pipefail
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+          # Pinned rather than StrictHostKeyChecking=no: without this the
+          # runner would hand the key to whatever answers on port 22.
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          # -T because the authorized_keys entry forbids a PTY; no remote
+          # command because the forced command ignores one anyway. deploy.sh
+          # exits non-zero on a failed health check, which fails this job.
+          ssh -T \
+            -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o ConnectTimeout=15 \
+            "$SSH_USER@$SSH_HOST"
