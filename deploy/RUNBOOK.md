@@ -1,6 +1,12 @@
 # Deploying mroueali.com
 
-Run as `ali` over SSH (mobile tethering — the home WiFi blocks outbound 22).
+Run as `ali` over SSH. The home ISP drops outbound port 22, so from home WiFi
+use 2222; port 22 works over mobile tethering and is what GitHub Actions uses.
+
+```bash
+ssh -p 2222 ali@169.58.241.120
+```
+
 Every step is idempotent; re-running one is safe.
 
 ## The shape of it
@@ -312,6 +318,26 @@ gh run watch
 ```
 
 ---
+
+## SSH itself
+
+sshd here runs as a plain service, not socket-activated: `ssh.socket` is disabled
+and `ssh.service` is enabled. That is deliberate. Under socket activation this
+host handed sshd a listening socket that accepted no IPv4 — sshd logged only
+`Server listening on :: port 22`, never `0.0.0.0`, so every connection to the
+IPv4 address got an instant RST while `systemctl status` reported green. Ports
+come from `/etc/ssh/sshd_config.d/altport.conf`, which names `Port 22` and
+`Port 2222` outright, because naming any Port disables the implicit 22.
+
+The first thing to check if SSH ever stops answering — from the Contabo VNC
+console, since you will not have SSH:
+
+```bash
+ss -tlnp | grep :22
+```
+
+Both `0.0.0.0:22` and `[::]:22` must be listed. Only `[::]` means the IPv4
+listener is gone again; do not re-enable `ssh.socket`.
 
 ## When something is wrong
 
