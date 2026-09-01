@@ -13,8 +13,8 @@ const layer = {
 
 /**
  * Fixed atmosphere behind the page: dot grid, film grain, two colour glows.
- * Static by design — the pointer is answered by PointerField, in front of the
- * content rather than behind it.
+ * Static by design — the pointer is answered by PointerField, which lays its
+ * trail on the layer just above these and still behind the content.
  */
 export function Backdrop() {
   return (

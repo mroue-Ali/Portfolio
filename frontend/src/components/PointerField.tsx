@@ -7,10 +7,14 @@ import { color } from '../theme';
 /**
  * The pointer trail, over the whole page.
  *
- * All of the work is in `lib/trail.ts` — this mounts one canvas above the
+ * All of the work is in `lib/trail.ts` — this mounts one canvas behind the
  * content, points the simulation at the window, and hands it the settings the
  * CMS saved. Fixed rather than in a section, so the trail crosses the site
  * instead of living inside one part of it.
+ *
+ * It sits above the backdrop's grain and glows but under every section, which
+ * all render at z-index 10 over a transparent background: the trail reads as
+ * part of the atmosphere and never washes over text.
  */
 export function PointerField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -40,7 +44,7 @@ export function PointerField() {
         inset: 0,
         width: '100%',
         height: '100%',
-        zIndex: 90,
+        zIndex: 3,
         pointerEvents: 'none',
       }}
     />
