@@ -75,6 +75,12 @@ services:
       - ./frontend:/app
     # node_modules stays in the bind mount, so a rebuild is incremental.
     command: sh -c "npm ci && npm run build"
+    environment:
+      # npm caches under $HOME/.npm, and the uid below owns no home directory
+      # inside the image — so $HOME is `/` and npm tries to create an
+      # unwritable /.npm. Keep the cache in the bind mount, where this uid
+      # already writes node_modules, and the build stops needing root.
+      npm_config_cache: /app/.npm
     # Same reason as the api service: build output lands in a bind mount, and
     # root-owned node_modules is a nuisance to clean up.
     user: "${APP_UID:-1000}:${APP_GID:-1000}"

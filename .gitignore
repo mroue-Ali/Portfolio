@@ -16,3 +16,9 @@ CLAUDE.md
 
 # Uploaded images live with the server that serves them.
 backend/media/
+
+# Local Docker uploads dir (see MEDIA_HOST_DIR in .env)
+media-local/
+
+# npm cache, redirected here because the build container has no home dir.
+frontend/.npm/
