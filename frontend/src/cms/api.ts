@@ -201,6 +201,12 @@ export type AboutRow = {
   paragraphs: string[];
 };
 
+/** The projects section itself — how it renders, not what is in it. */
+export type ProjectsContentRow = {
+  id: number;
+  layout: 'showcase' | 'list';
+};
+
 export type ContactRow = {
   id: number;
   cta: string;
@@ -362,6 +368,7 @@ export type UserRow = {
 export const api = {
   profile: singleton<ProfileRow>('profile'),
   about: singleton<AboutRow>('about'),
+  projectsContent: singleton<ProjectsContentRow>('projects-content'),
   contact: singleton<ContactRow>('contact'),
   ask: singleton<AskRow>('ask'),
   theme: singleton<ThemeRow>('theme'),

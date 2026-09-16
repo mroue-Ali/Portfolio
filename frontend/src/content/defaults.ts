@@ -219,6 +219,8 @@ export const stack: StackContent = {
 export const projects: ProjectsContent = {
   eyebrow: '03 / selected work',
   heading: 'Four things worth showing.',
+  /** The CMS switches this to 'list' while screenshots and links are missing. */
+  layout: 'showcase',
   items: [
     {
       number: '01',

@@ -172,6 +172,15 @@ router.include_router(
 )
 router.include_router(
     singleton_router(
+        path="/projects-content",
+        name="projects section",
+        model=models.ProjectsContent,
+        update_schema=schemas.ProjectsContentUpdate,
+        row_schema=schemas.ProjectsContentRow,
+    )
+)
+router.include_router(
+    singleton_router(
         path="/contact",
         name="contact",
         model=models.ContactContent,

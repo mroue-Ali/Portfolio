@@ -104,7 +104,22 @@ export type AboutContent = {
 
 export type StackContent = { eyebrow: string; heading: string; groups: StackGroup[] };
 
-export type ProjectsContent = { eyebrow: string; heading: string; items: Project[] };
+/**
+ * How the projects section renders.
+ *
+ * `showcase` is the pinned horizontal track, a screenshot beside every card.
+ * `list` is a plain index — number, title, summary, tags — which is what the
+ * section should be while the captures and the links are still missing: it
+ * asks for nothing the content does not have yet.
+ */
+export type ProjectsLayout = 'showcase' | 'list';
+
+export type ProjectsContent = {
+  eyebrow: string;
+  heading: string;
+  layout: ProjectsLayout;
+  items: Project[];
+};
 
 /** A line under the timeline: education, languages. */
 export type Footnote = { id?: RowId; text: string };

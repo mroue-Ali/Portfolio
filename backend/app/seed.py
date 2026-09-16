@@ -184,6 +184,10 @@ THEME_TEMPLATES = [
     ),
 ]
 
+#: The showcase track is the finished look; switch it to "list" in the CMS while
+#: the screenshots and the links are still missing.
+PROJECTS_SECTION = dict(layout="showcase")
+
 CONTACT = dict(
     cta="Start a conversation",
     colophon="Built with React, GSAP, and too much coffee.",
@@ -469,6 +473,7 @@ CONTENT_MODELS = [
     models.ThemeTemplate,
     models.ThemeSettings,
     models.AboutContent,
+    models.ProjectsContent,
     models.ContactContent,
     models.Profile,
 ]
@@ -496,6 +501,8 @@ def seed(db: Session, reset: bool = False) -> None:
         db.add(models.Profile(id=1, **PROFILE))
     if _empty(db, models.AboutContent):
         db.add(models.AboutContent(id=1, **ABOUT))
+    if _empty(db, models.ProjectsContent):
+        db.add(models.ProjectsContent(id=1, **PROJECTS_SECTION))
     if _empty(db, models.ContactContent):
         db.add(models.ContactContent(id=1, **CONTACT))
     if _empty(db, models.AskSettings):

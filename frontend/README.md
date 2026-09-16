@@ -91,6 +91,24 @@ seconds without a byte — falls back to the written answers, so the bar always
 responds. After the first chunk it cannot: the visitor is already reading, so a
 dropped connection ends the answer where it stopped rather than replacing it.
 
+### Selected work, two layouts
+
+`components/Projects.tsx` renders the same rows either way, and
+`projects.layout` — a select on `/admin/projects` — picks which:
+
+- **`showcase`** is the finished look: a pinned horizontal track, each project a
+  text panel with its screenshot beside it and its bullet points under the
+  summary. It wants a real capture and a real link on every project.
+- **`list`** is a plain index — number, title, summary, tags. No images, no
+  bullets, and a row is a link only when the project has one, so nothing on the
+  page promises something the content cannot deliver yet.
+
+`useSiteAnimations` takes the layout as its only dependency: the showcase pins a
+track and the list does not, so switching it in edit mode tears the ScrollTriggers
+down and measures again. `<section id="projects">` is keyed on the layout for the
+same reason — GSAP wraps the pinned element in a spacer of its own, and React has
+to remove the section rather than reach inside it.
+
 ## The CMS
 
 `/admin` — sign in with an account from `backend`'s `python -m app.accounts`.

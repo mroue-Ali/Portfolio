@@ -118,6 +118,8 @@ class ProjectOut(Public):
 class ProjectsOut(Public):
     eyebrow: str
     heading: str
+    #: "showcase" (pinned track with screenshots) | "list" (plain index).
+    layout: str
     items: list[ProjectOut]
 
 
@@ -280,6 +282,15 @@ class AboutUpdate(Admin):
 
 
 class AboutRow(Row, AboutUpdate):
+    pass
+
+
+class ProjectsContentUpdate(Admin):
+    #: Anything else would be a layout the frontend has no branch for.
+    layout: Optional[str] = Field(default=None, pattern="^(showcase|list)$")
+
+
+class ProjectsContentRow(Row, ProjectsContentUpdate):
     pass
 
 

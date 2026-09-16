@@ -335,6 +335,87 @@ input {
   transform: translateX(6px);
 }
 
+/* ---------- projects, list layout ---------- */
+
+/* The quiet layout: a ruled index rather than a pinned track. Every row carries
+   its own rule so the column reads as one list whether or not an entry is a
+   link — which it only is once someone has filled a URL in. */
+.project-index {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-entry {
+  border-top: 1px solid var(--c-border);
+}
+
+.project-entry:last-child {
+  border-bottom: 1px solid var(--c-border);
+}
+
+/* Anchor or plain div, depending on whether the project has a link. The colour
+   is set here because the global a:hover would otherwise turn the whole row. */
+.entry-inner {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding: 30px 14px 30px 4px;
+  color: var(--c-text);
+  transition:
+    background 0.4s,
+    padding-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entry-number {
+  padding-top: 6px;
+}
+
+.entry-title,
+.entry-number {
+  transition: color 0.35s;
+}
+
+/* Hover belongs to the rows that go somewhere. */
+a.entry-inner:hover,
+a.entry-inner:focus-visible {
+  background: linear-gradient(90deg, var(--c-surface), transparent 70%);
+  padding-left: 16px;
+}
+
+a.entry-inner:hover .entry-title,
+a.entry-inner:focus-visible .entry-title {
+  color: var(--c-accent);
+}
+
+a.entry-inner:hover .entry-number,
+a.entry-inner:focus-visible .entry-number {
+  color: var(--c-accent-alt);
+}
+
+a.entry-inner:hover .card-cta,
+a.entry-inner:focus-visible .card-cta {
+  color: var(--c-text);
+}
+
+a.entry-inner:hover .card-cta-arrow,
+a.entry-inner:focus-visible .card-cta-arrow {
+  transform: translateX(6px);
+}
+
+/* Narrow enough that a 52px gutter is a third of the width — stack instead. */
+@media (max-width: 599px) {
+  .entry-inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .entry-number {
+    padding-top: 0;
+  }
+}
+
 /* Below the pin breakpoint the horizontal track becomes a plain column, and
    each pair stacks: panel first, screenshot under it at a fixed ratio.
    Kept in CSS so it matches the breakpoint useSiteAnimations checks. */

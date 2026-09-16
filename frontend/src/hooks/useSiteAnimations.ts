@@ -17,8 +17,13 @@ const PIN_MIN_WIDTH = 900;
  *
  * Runs from App so it mounts after all sections exist, then refreshes
  * ScrollTrigger once every trigger has been measured.
+ *
+ * `projectsLayout` is the one piece of content the triggers depend on rather
+ * than merely describe: the showcase pins a track and the list does not, so
+ * switching it in edit mode has to tear the whole setup down and measure again.
+ * Everything else can change under GSAP without moving a trigger.
  */
-export function useSiteAnimations() {
+export function useSiteAnimations(projectsLayout: string) {
   useLayoutEffect(() => {
     const reduced = prefersReducedMotion();
 
@@ -294,5 +299,5 @@ export function useSiteAnimations() {
       lenis?.destroy();
       registerLenis(null);
     };
-  }, []);
+  }, [projectsLayout]);
 }

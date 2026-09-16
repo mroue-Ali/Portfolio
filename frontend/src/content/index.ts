@@ -42,6 +42,7 @@ export type {
   Profile,
   Project,
   ProjectsContent,
+  ProjectsLayout,
   Role,
   SiteContent,
   StackContent,

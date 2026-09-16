@@ -9,15 +9,13 @@ import { PointerField } from './components/PointerField';
 import { ProgressBar } from './components/ProgressBar';
 import { Projects } from './components/Projects';
 import { Stack } from './components/Stack';
+import { projects } from './content';
 import { useSiteAnimations } from './hooks/useSiteAnimations';
 import { EditLayer } from './live/EditLayer';
 import { useContentVersion } from './live/store';
 import { color } from './theme';
 
 export default function App() {
-  // Mounted here so every section exists before ScrollTrigger measures them.
-  useSiteAnimations();
-
   /**
    * Re-renders the page when its content is edited.
    *
@@ -27,6 +25,11 @@ export default function App() {
    * it already made. For a visitor this never fires.
    */
   useContentVersion();
+
+  // Mounted here so every section exists before ScrollTrigger measures them.
+  // Read after the subscription above, so switching the projects layout in edit
+  // mode rebuilds the triggers rather than leaving a pin over a list.
+  useSiteAnimations(projects.layout);
 
   return (
     <div style={{ position: 'relative', width: '100%', background: color.bg }}>

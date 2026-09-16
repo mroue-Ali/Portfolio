@@ -60,6 +60,12 @@ ships in the response, so it can never point at the wrong thing.
 `projects.published` and `nav_items.visible` are false-able without deleting:
 unpublished rows stay in the CMS and disappear from `/api/content`.
 
+`projects.layout` (from `projects_content`) is `showcase` or `list` — the pinned
+track with a screenshot per project, or a plain index of the same rows. The
+second is the one to sit on while the captures and the links are still missing;
+the frontend branches on it, nothing else changes. A database with the table but
+no row serves `showcase`, so the site never goes down over a layout.
+
 Rows that the CMS can edit in place carry their `id` in the public payload
 (projects, roles, stats, stack groups and tiles, footnotes, and `nav[].rowId`).
 Edit mode on the site needs a handle back to the row behind a piece of text, and
@@ -77,7 +83,7 @@ answer is produced is a `.env` setting; see *The ask bar* below.
 ## Schema
 
 Singletons (one row, `id = 1`, patch-only): `profile`, `about_content`,
-`contact_content`, `ask_settings`, `theme_settings`.
+`projects_content`, `contact_content`, `ask_settings`, `theme_settings`.
 
 Collections (ordered by `position`): `sections`, `nav_items`, `stats`,
 `stack_groups` → `stack_tiles`, `projects`, `roles`, `footnotes`, `answers`, `theme_templates`.
@@ -182,8 +188,8 @@ DELETE /api/admin/{resource}/{id}       delete
 
 Resources: `nav`, `stats`, `stack-groups`, `stack-tiles`, `projects`, `roles`,
 `footnotes`, `answers`, `theme-templates`. Singletons expose `GET`/`PATCH` at
-`/api/admin/{profile,about,contact,ask,theme}`. Sections are addressed by key:
-`/api/admin/sections/{key}`.
+`/api/admin/{profile,about,projects-content,contact,ask,theme}`. Sections are
+addressed by key: `/api/admin/sections/{key}`.
 
 Deleting a stack group deletes its tiles. Unique-constraint violations come back
 as 409, missing rows as 404.

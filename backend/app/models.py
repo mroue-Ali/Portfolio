@@ -94,6 +94,27 @@ class AboutContent(TimestampMixin, Base):
     paragraphs: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
 
 
+class ProjectsContent(TimestampMixin, Base):
+    """
+    How the projects section presents itself.
+
+    One column, because there is only one decision to make here: `showcase` is
+    the pinned horizontal track with a screenshot beside every card, `list` is a
+    plain index that needs nothing but the words. The second is what you want
+    while the captures and the links are still missing — the section stays, and
+    it stops advertising the holes.
+
+    The projects themselves live in `projects`, and the eyebrow and heading above
+    them in `sections`.
+    """
+
+    __tablename__ = "projects_content"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    #: "showcase" | "list".
+    layout: Mapped[str] = mapped_column(String(20), default="showcase", nullable=False)
+
+
 class ContactContent(TimestampMixin, Base):
     """Closing section: call to action and colophon."""
 

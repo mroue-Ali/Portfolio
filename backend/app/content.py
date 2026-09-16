@@ -27,6 +27,9 @@ def build_content(db: Session) -> schemas.SiteContent:
     profile = db.get(models.Profile, 1)
     about = db.get(models.AboutContent, 1)
     contact = db.get(models.ContactContent, 1)
+    # Not in the check below: a database migrated but not re-seeded should fall
+    # back to the showcase layout, not refuse to serve the site.
+    projects_content = db.get(models.ProjectsContent, 1)
     ask = db.get(models.AskSettings, 1)
     theme = db.get(models.ThemeSettings, 1)
     if not (profile and about and contact and ask and theme):
@@ -173,6 +176,7 @@ def build_content(db: Session) -> schemas.SiteContent:
         projects=schemas.ProjectsOut(
             eyebrow=projects_eyebrow,
             heading=projects_heading,
+            layout=projects_content.layout if projects_content else "showcase",
             items=[
                 schemas.ProjectOut(
                     id=p.id,
