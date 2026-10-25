@@ -111,6 +111,7 @@ class ProjectOut(Public):
     points: list[str]
     tags: list[str]
     image: str
+    images: list[str]
     link: str
     repo: str
     description: str
@@ -565,6 +566,7 @@ class ProjectCreate(Admin):
     points: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     image: str = ""
+    images: list[str] = Field(default_factory=list)
     link: str = ""
     repo: str = ""
     description: str = ""
@@ -580,6 +582,7 @@ class ProjectUpdate(Admin):
     points: Optional[list[str]] = None
     tags: Optional[list[str]] = None
     image: Optional[str] = None
+    images: Optional[list[str]] = None
     link: Optional[str] = None
     repo: Optional[str] = None
     description: Optional[str] = None

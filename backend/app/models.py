@@ -312,6 +312,8 @@ class Project(TimestampMixin, Ordered, Base):
     #: Path under frontend/public, e.g. /projects/knowledge-base-rag.svg.
     image: Mapped[str] = mapped_column(String(255), default="", nullable=False)
     #: The live site. Empty hides the "Visit site" button.
+    #: Gallery on the details view, shown uncropped in this order.
+    images: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     link: Mapped[str] = mapped_column(String(255), default="", nullable=False)
     #: Source repository. Empty hides the "View repo" button.
     repo: Mapped[str] = mapped_column(String(255), default="", nullable=False)

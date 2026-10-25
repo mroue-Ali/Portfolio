@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { assetUrl, projects, type Project } from '../content';
-import { Editable } from '../live/Editable';
-import { ImageDrop } from '../live/ImageDrop';
-import { edit } from '../live/bindings';
-import { useEditMode } from '../live/mode';
-import { lockScroll } from '../lib/scroll';
-import { color, dataText, font, monoLabel, sectionHeading } from '../theme';
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { assetUrl, projects, type Project } from "../content";
+import { Editable } from "../live/Editable";
+import { ImageDrop } from "../live/ImageDrop";
+import { edit } from "../live/bindings";
+import { useEditMode } from "../live/mode";
+import { lockScroll } from "../lib/scroll";
+import { color, dataText, font, monoLabel, sectionHeading } from "../theme";
 
 /**
  * Selected work: a grid of cards, each opening a details view.
@@ -29,16 +29,20 @@ export function Projects() {
     const sync = () => {
       const match = /^#project-(.+)$/.exec(window.location.hash);
       if (!match) pushed.current = false;
-      setOpen(match ? (projects.items.find((p) => slug(p) === match[1]) ?? null) : null);
+      setOpen(
+        match
+          ? (projects.items.find((p) => slug(p) === match[1]) ?? null)
+          : null,
+      );
     };
     sync();
-    window.addEventListener('popstate', sync);
-    return () => window.removeEventListener('popstate', sync);
+    window.addEventListener("popstate", sync);
+    return () => window.removeEventListener("popstate", sync);
   }, []);
 
   const show = (project: Project) => {
     pushed.current = true;
-    window.history.pushState(null, '', `#project-${slug(project)}`);
+    window.history.pushState(null, "", `#project-${slug(project)}`);
     setOpen(project);
   };
 
@@ -47,7 +51,11 @@ export function Projects() {
       window.history.back();
     } else {
       // Arrived on a shared link: there is nothing behind it to go back to.
-      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
       setOpen(null);
     }
   };
@@ -55,12 +63,27 @@ export function Projects() {
   return (
     <section
       id="projects"
-      style={{ position: 'relative', zIndex: 10, borderTop: `1px solid ${color.border}` }}
+      style={{
+        position: "relative",
+        zIndex: 10,
+        borderTop: `1px solid ${color.border}`,
+      }}
     >
-      <div style={{ padding: '140px 6vw', maxWidth: 1240, margin: '0 auto' }}>
-        <div data-reveal style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <Editable bind={edit.section('projects', 'eyebrow')} as="div" style={monoLabel} />
-          <Editable bind={edit.section('projects', 'heading')} as="h2" style={sectionHeading} />
+      <div style={{ padding: "140px 6vw", maxWidth: 1240, margin: "0 auto" }}>
+        <div
+          data-reveal
+          style={{ display: "flex", flexDirection: "column", gap: 18 }}
+        >
+          <Editable
+            bind={edit.section("projects", "eyebrow")}
+            as="div"
+            style={monoLabel}
+          />
+          <Editable
+            bind={edit.section("projects", "heading")}
+            as="h2"
+            style={sectionHeading}
+          />
         </div>
 
         <ul className="project-grid">
@@ -79,15 +102,23 @@ export function Projects() {
 
 /** The card number when it has one, else the list position — what the hash names. */
 const slug = (project: Project) =>
-  (project.number || String(projects.items.indexOf(project) + 1)).trim().toLowerCase();
+  (project.number || String(projects.items.indexOf(project) + 1))
+    .trim()
+    .toLowerCase();
 
 /** The screenshot, or the project's number on the surface when there is none. */
-function Cover({ project, large = false }: { project: Project; large?: boolean }) {
+function Cover({
+  project,
+  large = false,
+}: {
+  project: Project;
+  large?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   const hasImage = Boolean(project.image) && !failed;
 
   return (
-    <figure className={`project-cover${large ? ' is-large' : ''}`}>
+    <figure className={`project-cover${large ? " is-large" : ""}`}>
       {hasImage ? (
         <img
           src={assetUrl(project.image)}
@@ -109,14 +140,14 @@ function Cover({ project, large = false }: { project: Project; large?: boolean }
 
 function Tags({ project }: { project: Project }) {
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
       {project.tags.map((tag, i) => (
         <Editable
           key={`${tag}-${i}`}
           bind={edit.project.tag(project, i)}
           style={{
             ...dataText,
-            padding: '5px 10px',
+            padding: "5px 10px",
             border: `1px solid ${color.border}`,
             borderRadius: 999,
           }}
@@ -131,19 +162,25 @@ function Tags({ project }: { project: Project }) {
  * In edit mode a click belongs to the text under it, so there the card opens
  * only from its "View details" line.
  */
-function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+function ProjectCard({
+  project,
+  onOpen,
+}: {
+  project: Project;
+  onOpen: () => void;
+}) {
   const editing = useEditMode();
 
   return (
     <article
       className="project-card"
       data-cursor="link"
-      role={editing ? undefined : 'button'}
+      role={editing ? undefined : "button"}
       tabIndex={editing ? undefined : 0}
       aria-label={editing ? undefined : `${project.title} — details`}
       onClick={editing ? undefined : onOpen}
       onKeyDown={(e) => {
-        if (!editing && (e.key === 'Enter' || e.key === ' ')) {
+        if (!editing && (e.key === "Enter" || e.key === " ")) {
           e.preventDefault();
           onOpen();
         }
@@ -152,7 +189,11 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
       <Cover project={project} />
 
       <div className="project-body">
-        <Editable bind={edit.project.number(project)} as="span" style={dataText} />
+        <Editable
+          bind={edit.project.number(project)}
+          as="span"
+          style={dataText}
+        />
         <Editable
           bind={edit.project.title(project)}
           as="h3"
@@ -161,29 +202,56 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
             margin: 0,
             fontFamily: font.display,
             fontWeight: 500,
-            fontSize: 'clamp(22px, 2vw, 28px)',
+            fontSize: "clamp(22px, 2vw, 28px)",
             lineHeight: 1.1,
-            letterSpacing: '-0.03em',
+            letterSpacing: "-0.03em",
           }}
         />
         <Editable
           bind={edit.project.summary(project)}
           as="p"
-          style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: color.muted }}
+          style={{
+            margin: 0,
+            fontSize: 15,
+            lineHeight: 1.6,
+            color: color.muted,
+          }}
         />
         <span
           className="card-cta"
-          role={editing ? 'button' : undefined}
+          role={editing ? "button" : undefined}
           onClick={editing ? onOpen : undefined}
-          style={{ marginTop: 'auto', fontFamily: font.body, fontSize: 14, fontWeight: 500 }}
+          style={{
+            marginTop: "auto",
+            fontFamily: font.body,
+            fontSize: 14,
+            fontWeight: 500,
+          }}
         >
-          View details{' '}
+          View details{" "}
           <span className="card-cta-arrow" aria-hidden="true">
             →
           </span>
         </span>
       </div>
     </article>
+  );
+}
+
+/** One gallery image at its own proportions; drops out if the file is missing. */
+function GalleryImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return null;
+  return (
+    <a href={assetUrl(src)} target="_blank" rel="noreferrer" data-cursor="link">
+      <img
+        src={assetUrl(src)}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        onError={() => setFailed(true)}
+      />
+    </a>
   );
 }
 
@@ -198,7 +266,13 @@ const paragraphs = (text: string) =>
  * The details view: a sheet over the page. Portalled to the body so the
  * section's stacking context can't leave the nav sitting on top of it.
  */
-function ProjectDetails({ project, onClose }: { project: Project; onClose: () => void }) {
+function ProjectDetails({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose: () => void;
+}) {
   const editing = useEditMode();
   // Latest handler without re-running the effect, which would unlock and relock.
   const closeRef = useRef(onClose);
@@ -209,16 +283,20 @@ function ProjectDetails({ project, onClose }: { project: Project; onClose: () =>
   useEffect(() => {
     lockScroll(true);
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeRef.current();
+      if (e.key === "Escape") closeRef.current();
     };
-    window.addEventListener('keydown', onKey);
+    window.addEventListener("keydown", onKey);
     return () => {
       lockScroll(false);
-      window.removeEventListener('keydown', onKey);
+      window.removeEventListener("keydown", onKey);
     };
   }, []);
 
   const body = paragraphs(project.description);
+  // Cover first, then the gallery; the cover isn't repeated if it is listed too.
+  const gallery = [
+    ...new Set([project.image, ...(project.images ?? [])].filter(Boolean)),
+  ];
 
   return createPortal(
     <div className="details-backdrop" onClick={onClose}>
@@ -240,22 +318,34 @@ function ProjectDetails({ project, onClose }: { project: Project; onClose: () =>
           ✕
         </button>
 
-        <header style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <header style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <span style={dataText}>{project.number}</span>
           <Editable
             bind={edit.project.title(project)}
             as="h2"
-            style={{ ...sectionHeading, fontSize: 'clamp(30px, 4vw, 52px)' }}
+            style={{ ...sectionHeading, fontSize: "clamp(30px, 4vw, 52px)" }}
           />
           <Editable
             bind={edit.project.summary(project)}
             as="p"
-            style={{ margin: 0, fontSize: 18, lineHeight: 1.55, color: color.muted }}
+            style={{
+              margin: 0,
+              fontSize: 18,
+              lineHeight: 1.55,
+              color: color.muted,
+            }}
           />
           <Tags project={project} />
 
           {(project.link || project.repo) && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 6 }}>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 12,
+                marginTop: 6,
+              }}
+            >
               {project.link && (
                 <a
                   className="details-btn is-primary"
@@ -264,7 +354,8 @@ function ProjectDetails({ project, onClose }: { project: Project; onClose: () =>
                   rel="noreferrer"
                   data-cursor="link"
                 >
-                  {project.linkLabel || 'Visit site'} <span aria-hidden="true">↗</span>
+                  {project.linkLabel || "Visit site"}{" "}
+                  <span aria-hidden="true">↗</span>
                 </a>
               )}
               {project.repo && (
@@ -282,14 +373,21 @@ function ProjectDetails({ project, onClose }: { project: Project; onClose: () =>
           )}
         </header>
 
-        {(project.image || editing) && <Cover project={project} large />}
+        {editing && <Cover project={project} large />}
+        {gallery.length > 0 && !editing && (
+          <div className="details-gallery">
+            {gallery.map((src) => (
+              <GalleryImage key={src} src={src} alt={project.title} />
+            ))}
+          </div>
+        )}
 
         {editing ? (
           <Editable
             bind={edit.project.description(project)}
             as="div"
             className="details-prose"
-            style={{ whiteSpace: 'pre-wrap' }}
+            style={{ whiteSpace: "pre-wrap" }}
           />
         ) : (
           body.length > 0 && (
@@ -302,11 +400,15 @@ function ProjectDetails({ project, onClose }: { project: Project; onClose: () =>
         )}
 
         {project.points.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <span style={monoLabel}>highlights</span>
             <ul className="details-points">
               {project.points.map((_, i) => (
-                <Editable key={i} bind={edit.project.point(project, i)} as="li" />
+                <Editable
+                  key={i}
+                  bind={edit.project.point(project, i)}
+                  as="li"
+                />
               ))}
             </ul>
           </div>

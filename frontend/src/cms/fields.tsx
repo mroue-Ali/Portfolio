@@ -23,7 +23,8 @@ export type FieldType =
   | 'color'
   | 'select'
   | 'password'
-  | 'image';
+  | 'image'
+  | 'images';
 
 export type FieldSpec = {
   /** Column name — also the key into the draft record. */
@@ -385,6 +386,68 @@ export function ListInput({
   );
 }
 
+/** An ordered list of images, each picked the way a single image field is. */
+export function ImageListInput({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const items = value ?? [];
+
+  const move = (index: number, by: number) => {
+    const target = index + by;
+    if (target < 0 || target >= items.length) return;
+    const next = [...items];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(next);
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {items.map((item, index) => (
+        <div key={index} style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <ImageField
+              value={item}
+              onChange={(next) => onChange(items.map((it, i) => (i === index ? next : it)))}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 2, paddingTop: 5 }}>
+            <IconButton label="Move up" disabled={index === 0} onClick={() => move(index, -1)}>
+              <Arrow direction="up" />
+            </IconButton>
+            <IconButton
+              label="Move down"
+              disabled={index === items.length - 1}
+              onClick={() => move(index, 1)}
+            >
+              <Arrow direction="down" />
+            </IconButton>
+            <IconButton
+              label="Remove"
+              onClick={() => onChange(items.filter((_, i) => i !== index))}
+            >
+              <Cross />
+            </IconButton>
+          </div>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="cms-btn"
+        data-size="sm"
+        data-variant="ghost"
+        style={{ alignSelf: 'flex-start' }}
+        onClick={() => onChange([...items, ''])}
+      >
+        + Add image
+      </button>
+    </div>
+  );
+}
+
 export function Arrow({ direction }: { direction: 'up' | 'down' }) {
   return (
     <svg
@@ -492,6 +555,8 @@ export function FieldControl({
       return <ColorInput value={(value as string) ?? ''} onChange={onChange} />;
     case 'image':
       return <ImageField value={(value as string) ?? ''} onChange={onChange} hint={spec.hint} />;
+    case 'images':
+      return <ImageListInput value={(value as string[]) ?? []} onChange={onChange} />;
     case 'select':
       return (
         <select
@@ -543,7 +608,7 @@ function SpecField({
 }) {
   const id = useId();
   // A list needs the width; a toggle labels itself.
-  const wide = spec.type === 'list' || spec.type === 'textarea' || spec.type === 'image';
+  const wide = spec.type === 'list' || spec.type === 'textarea' || spec.type === 'image' || spec.type === 'images';
   const span = spec.span ?? (wide ? 2 : 1);
 
   return (

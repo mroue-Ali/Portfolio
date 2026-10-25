@@ -51,6 +51,11 @@ export type Project = {
    * extension here. A missing file leaves the empty frame rather than breaking.
    */
   image: string;
+  /**
+   * Gallery on the details view, shown at their own proportions. The cover
+   * `image` leads it unless it is also listed here.
+   */
+  images: string[];
   /** The live site. Empty hides the "Visit site" button on the details view. */
   link: string;
   /** Source repository. Empty hides the "View repo" button. */

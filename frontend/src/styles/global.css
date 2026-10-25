@@ -417,6 +417,31 @@ html[data-tone='light'] .grain {
   color: var(--c-text);
 }
 
+/* Uncropped: each image keeps its own aspect ratio, capped so a tall phone
+   capture doesn't run several screens long. Click opens the original. */
+.details-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.details-gallery a {
+  display: flex;
+  justify-content: center;
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  background: var(--c-bg);
+  overflow: hidden;
+}
+
+.details-gallery img {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+}
+
 .details-prose {
   max-width: 68ch;
   font-size: 16px;

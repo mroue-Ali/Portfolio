@@ -315,6 +315,7 @@ export type ProjectRow = {
   points: string[];
   tags: string[];
   image: string;
+  images: string[];
   link: string;
   repo: string;
   description: string;

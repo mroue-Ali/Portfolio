@@ -186,6 +186,7 @@ def build_content(db: Session) -> schemas.SiteContent:
                     points=p.points,
                     tags=p.tags,
                     image=p.image,
+                    images=p.images or [],
                     link=p.link,
                     repo=p.repo,
                     description=p.description,

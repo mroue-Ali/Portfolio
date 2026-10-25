@@ -47,7 +47,13 @@ const SPECS: FieldSpec[] = [
     name: 'image',
     label: 'Screenshot',
     type: 'image',
-    hint: 'Optional. Drop a capture here, or pick one you have already uploaded. Around 16:10 and at least 1600px wide fills the frame; a missing file leaves the frame empty rather than breaking.',
+    hint: 'Optional. The card cover (cropped to 16:10 on the grid, shown whole on the details view). Drop a capture here, or pick one you have already uploaded. Around 16:10 and at least 1600px wide fills the frame; a missing file leaves the frame empty rather than breaking.',
+  },
+  {
+    name: 'images',
+    label: 'Gallery',
+    type: 'images',
+    hint: 'More images for the details view, shown whole at their own proportions — nothing is cropped. The screenshot above leads the gallery.',
   },
   {
     name: 'link',
