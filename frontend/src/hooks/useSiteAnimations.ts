@@ -65,20 +65,6 @@ export function useSiteAnimations(projectsLayout: string) {
         },
       });
 
-      // ---------- backdrop parallax ----------
-      if (!reduced) {
-        gsap.to('[data-glow="a"]', {
-          yPercent: 26,
-          ease: 'none',
-          scrollTrigger: { start: 0, end: 'max', scrub: 1.2 },
-        });
-        gsap.to('[data-glow="b"]', {
-          yPercent: -22,
-          ease: 'none',
-          scrollTrigger: { start: 0, end: 'max', scrub: 1.2 },
-        });
-      }
-
       // ---------- nav ----------
       gsap.to('[data-nav]', {
         opacity: 1,
@@ -106,62 +92,17 @@ export function useSiteAnimations(projectsLayout: string) {
       // ---------- section reveals ----------
       gsap.utils.toArray<HTMLElement>('[data-reveal]').forEach((el) => {
         const targets = el.children.length ? el.children : [el];
+        // A short settle, not a rise: fading every block up from 30px is the
+        // scroll animation every template ships, and it slows reading down.
         gsap.from(targets, {
-          y: 30,
+          y: 12,
           opacity: 0,
-          duration: 0.8,
-          ease: 'power3.out',
-          stagger: 0.08,
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: 0.05,
           scrollTrigger: { trigger: el, start: 'top 82%', once: true },
         });
       });
-
-      if (!reduced) {
-        gsap.to('[data-portrait]', {
-          yPercent: -12,
-          ease: 'none',
-          scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: true },
-        });
-      }
-
-      // ---------- stat counters ----------
-      gsap.utils.toArray<HTMLElement>('[data-count]').forEach((el) => {
-        const end = Number(el.getAttribute('data-count'));
-        const suffix = el.getAttribute('data-suffix') ?? '';
-        const counter = { value: 0 };
-        gsap.to(counter, {
-          value: end,
-          duration: 1.6,
-          ease: 'power2.out',
-          onUpdate: () => {
-            el.textContent = Math.round(counter.value).toLocaleString('en-US') + suffix;
-          },
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        });
-      });
-
-      // ---------- stack marquee ----------
-      // Driven here rather than by a CSS keyframe: the reduced-motion block in
-      // global.css clamps every animation-duration with !important, which froze
-      // the band outright. GSAP lets us opt out deliberately instead.
-      if (!reduced) {
-        gsap.utils.toArray<HTMLElement>('[data-marquee]').forEach((row) => {
-          const seconds = Number(row.getAttribute('data-marquee-seconds')) || 30;
-          const toLeft = row.getAttribute('data-marquee') === 'left';
-          // The row holds two identical groups, so half its width is one full
-          // loop. Starting the rightward row at -50% keeps it filled on screen.
-          gsap.fromTo(
-            row,
-            { xPercent: toLeft ? 0 : -50 },
-            {
-              xPercent: toLeft ? -50 : 0,
-              duration: seconds,
-              ease: 'none',
-              repeat: -1,
-            },
-          );
-        });
-      }
 
       // ---------- projects ----------
       const track = document.querySelector<HTMLElement>('[data-track]');
@@ -172,11 +113,11 @@ export function useSiteAnimations(projectsLayout: string) {
       const revealShot = (shot: HTMLElement, trigger: ScrollTrigger.Vars) =>
         gsap.from(shot, {
           autoAlpha: 0,
-          scale: 0.9,
-          xPercent: 6,
-          duration: 0.85,
-          // Slight overshoot so it reads as a pop rather than a fade.
-          ease: 'back.out(1.4)',
+          scale: 0.96,
+          xPercent: 4,
+          duration: 0.8,
+          // No overshoot: a bounce on arrival is the stock template entrance.
+          ease: 'power3.out',
           scrollTrigger: { trigger: shot, once: true, ...trigger },
         });
 
@@ -240,10 +181,9 @@ export function useSiteAnimations(projectsLayout: string) {
 
       gsap.utils.toArray<HTMLElement>('[data-entry]').forEach((el) => {
         gsap.from(el, {
-          x: 40,
+          x: 24,
           opacity: 0,
-          filter: 'blur(6px)',
-          duration: 0.9,
+          duration: 0.8,
           ease: 'power3.out',
           scrollTrigger: { trigger: el, start: 'top 82%', once: true },
         });
@@ -274,7 +214,7 @@ export function useSiteAnimations(projectsLayout: string) {
           if (Math.hypot(dx, dy) < r.width / 2 + 60) {
             gsap.to(btn, { x: dx * 0.22, y: Math.max(-8, dy * 0.22), duration: 0.35, ease: 'power2.out' });
           } else {
-            gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.4)' });
+            gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'power3.out' });
           }
         };
         window.addEventListener('pointermove', onMove, { passive: true });

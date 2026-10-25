@@ -3,7 +3,7 @@ import { assetUrl, projects, type Project } from '../content';
 import { Editable } from '../live/Editable';
 import { ImageDrop } from '../live/ImageDrop';
 import { edit } from '../live/bindings';
-import { color, font, gradient, monoLabel, sectionHeading, textGradient } from '../theme';
+import { color, dataText, font, monoLabel, sectionHeading } from '../theme';
 
 /**
  * Selected work, in one of two layouts.
@@ -55,14 +55,10 @@ function Tags({ project }: { project: Project }) {
           key={`${tag}-${i}`}
           bind={edit.project.tag(project, i)}
           style={{
+            ...dataText,
             padding: '5px 10px',
             border: `1px solid ${color.border}`,
             borderRadius: 999,
-            fontFamily: font.mono,
-            fontSize: 10,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            color: color.muted,
           }}
         />
       ))}
@@ -80,10 +76,9 @@ function Cta({ project }: { project: Project }) {
         alignItems: 'center',
         gap: 10,
         marginTop: 6,
-        fontFamily: font.mono,
-        fontSize: 11,
-        letterSpacing: '0.16em',
-        textTransform: 'uppercase',
+        fontFamily: font.body,
+        fontSize: 15,
+        fontWeight: 500,
       }}
     >
       <Editable bind={edit.project.linkLabel(project)} />
@@ -141,12 +136,7 @@ function ProjectIndex() {
                 bind={edit.project.number(project)}
                 as="span"
                 className="entry-number"
-                style={{
-                  fontFamily: font.mono,
-                  fontSize: 11,
-                  letterSpacing: '0.15em',
-                  color: color.muted,
-                }}
+                style={dataText}
               />
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
@@ -249,7 +239,7 @@ function ProjectShowcase() {
                   letterSpacing: '-0.05em',
                   opacity: 0.06,
                   pointerEvents: 'none',
-                  ...textGradient(gradient.brand),
+                  color: color.text,
                 }}
               >
                 {project.number}
@@ -266,12 +256,7 @@ function ProjectShowcase() {
                 <Editable
                   bind={edit.project.number(project)}
                   as="div"
-                  style={{
-                    fontFamily: font.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.15em',
-                    color: color.muted,
-                  }}
+                  style={dataText}
                 />
                 <Editable
                   bind={edit.project.title(project)}

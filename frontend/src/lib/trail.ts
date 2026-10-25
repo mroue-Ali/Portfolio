@@ -376,6 +376,12 @@ export function createTrail(canvas: HTMLCanvasElement, options: TrailOptions): T
   /** One list per tint, per distance band. */
   let links: number[][] = [];
   const bandAlpha = [0.07, 0.16, 0.32];
+  /**
+   * Lines on paper are ink, not light. On a dark ground they add and glow; on a
+   * light one each crossing darkens the last, so a mesh that reads as a haze on
+   * ink turns into scribble. Lines are drawn at a little over half strength there.
+   */
+  const INK = 0.55;
 
   const sizeLinkBuckets = () => {
     links = Array.from({ length: tints.length * 3 }, () => []);
@@ -543,7 +549,7 @@ export function createTrail(canvas: HTMLCanvasElement, options: TrailOptions): T
         const arr = links[n];
         if (!arr.length) continue;
         ctx.strokeStyle = `rgb(${tints[(n / 3) | 0]})`;
-        ctx.globalAlpha = bandAlpha[n % 3] * T.alpha;
+        ctx.globalAlpha = bandAlpha[n % 3] * T.alpha * (additive ? 1 : INK);
         ctx.beginPath();
         for (let m = 0; m < arr.length; m += 2) {
           ctx.moveTo(px[arr[m]], py[arr[m]]);
@@ -556,7 +562,7 @@ export function createTrail(canvas: HTMLCanvasElement, options: TrailOptions): T
     // Threads back to the pointer, so the chain reads as attached to the hand.
     if (T.threads && mouse.on) {
       ctx.strokeStyle = `rgb(${rgb(palette.text)})`;
-      ctx.globalAlpha = 0.2 * T.alpha;
+      ctx.globalAlpha = 0.2 * T.alpha * (additive ? 1 : INK);
       ctx.lineWidth = 1;
       ctx.beginPath();
       let drawn = 0;

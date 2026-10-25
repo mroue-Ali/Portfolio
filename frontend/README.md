@@ -140,8 +140,11 @@ preview runs the real particle simulation against the unsaved draft. It drives
 `useDraft` directly, so dirty state and saving behave exactly as they do on every
 other page.
 
-It edits four things. **Palette** - nine shipped sets, or any of the seven roles
-by hand; editing one by hand flips the preset label to `custom`. **Cursor** -
+It edits four things. **Palette** - ten shipped sets, or any of the seven roles
+by hand; editing one by hand flips the preset label to `custom`. Sea Salt is the
+light one; any palette whose background is light gets the light treatment (grain
+blend, trail strength, browser `color-scheme`), so a hand-made light palette works
+too. **Cursor** -
 which of six shapes replaces the system arrow, its size, and whether it turns;
 `native` gives the arrow back and switches the rest off. **Trail** - what the
 cursor generates as you move it: the mark, which direction nodes travel relative
@@ -215,6 +218,14 @@ back to `defaults.ts`, which has nothing to save to, and the bar says so.
 
 Hover states live in `global.css`, not inline. Inline styles outrank class
 rules, so any property that changes on hover must not also be set inline.
+
+The site deliberately avoids the marks of a generated page: no gradient text
+(`gradient.brand` and `gradient.headline` resolve to one flat colour), no blurred
+colour glows or dot grid behind the page, no spinning gradient borders, no
+count-up stats, no bounce or elastic easing. Monospace is for data (dates, tags,
+numbers, the question counter) through `dataText`; small words use `metaText` in
+the body face. Keep new work inside those lines, or the site drifts back toward
+the template look.
 
 ## Motion
 

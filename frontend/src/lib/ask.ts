@@ -112,11 +112,13 @@ export async function streamAnswer(
         onChunk(text);
       }
     }
-  } catch (err) {
+  } catch {
     // Deliberate close from the caller — not a failure, and not ours to answer.
     if (signal?.aborted) return;
     if (started) return;
+    // Return here, or the stream-ended-empty fallback below sends it again.
     onChunk(pickCanned(question));
+    return;
   } finally {
     if (timer !== undefined) window.clearTimeout(timer);
     signal?.removeEventListener('abort', abort);

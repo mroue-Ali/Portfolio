@@ -1,8 +1,8 @@
-import { about, assetUrl } from '../content';
+import { about, assetUrl, profile } from '../content';
 import { Editable } from '../live/Editable';
 import { ImageDrop } from '../live/ImageDrop';
 import { edit } from '../live/bindings';
-import { color, font, monoLabel, sectionHeading } from '../theme';
+import { color, font, metaText, monoLabel, sectionHeading } from '../theme';
 
 export function About() {
   return (
@@ -28,30 +28,17 @@ export function About() {
       >
         <div data-reveal style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
           <div style={{ position: 'relative', width: '100%', maxWidth: 380, aspectRatio: '1' }}>
-            {/* Rotating conic ring, masked to a 1px band by the inset disc. */}
+            {/* A still hairline a little off the frame. It used to be a gradient
+                arc spinning round the portrait, which pulled the eye off the face. */}
             <div
               aria-hidden="true"
               style={{
                 position: 'absolute',
                 inset: -14,
                 borderRadius: '50%',
-                padding: 1,
-                overflow: 'hidden',
+                border: `1px solid ${color.border}`,
               }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  inset: '-40%',
-                  background:
-                    `conic-gradient(from 0deg, transparent 0deg, ${color.accent} 120deg, ${color.accentAlt} 220deg, transparent 320deg)`,
-                  animation: 'ringspin 14s linear infinite',
-                }}
-              />
-              <div
-                style={{ position: 'absolute', inset: 1, borderRadius: '50%', background: color.bg }}
-              />
-            </div>
+            />
             <div
               data-portrait
               style={{
@@ -64,7 +51,6 @@ export function About() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                willChange: 'transform',
               }}
             >
               {/* The placeholder is what the frame says until there is a
@@ -72,21 +58,13 @@ export function About() {
               {about.portraitImage ? (
                 <img
                   src={assetUrl(about.portraitImage)}
-                  alt=""
+                  alt={profile.name}
                   style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 />
               ) : (
                 <Editable
                   bind={edit.about.portraitPlaceholder()}
-                  style={{
-                    fontFamily: font.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: color.muted,
-                    textAlign: 'center',
-                    padding: '0 30px',
-                  }}
+                  style={{ ...metaText, textAlign: 'center', padding: '0 30px' }}
                 />
               )}
               <ImageDrop bind={edit.about.portrait()} />
@@ -134,22 +112,14 @@ export function About() {
                     letterSpacing: '-0.03em',
                   }}
                 >
-                  {/* Counted up by ScrollTrigger; starts at 0 so the tick is visible. */}
-                  <span data-count={stat.value} data-suffix={stat.suffix}>
-                    0
+                  {/* The real figure from the first frame. Counting up from zero is
+                      the stat banner every template ships with. */}
+                  <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {stat.value.toLocaleString('en-US')}
+                    {stat.suffix}
                   </span>
                 </div>
-                <Editable
-                  bind={edit.about.statLabel(stat)}
-                  as="div"
-                  style={{
-                    fontFamily: font.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: color.muted,
-                  }}
-                />
+                <Editable bind={edit.about.statLabel(stat)} as="div" style={metaText} />
               </div>
             ))}
           </div>

@@ -8,20 +8,23 @@
    which is what makes a palette change reach the stylesheet at all. Declaring
    them here as well means the site still renders correctly if that never runs. */
 :root {
-  --c-bg: #15181d;
-  --c-surface: #1e2228;
-  --c-border: #2f353e;
-  --c-text: #e9ecf0;
-  --c-muted: #9aa2ad;
-  --c-accent: #7b68fa;
-  --c-accent-alt: #45d9ef;
+  --c-bg: #0c1418;
+  --c-surface: #14212a;
+  --c-border: #23353f;
+  --c-text: #e4f1f5;
+  --c-muted: #8fa6af;
+  --c-accent: #2ed3b7;
+  --c-accent-alt: #4da6ff;
 
-  --c-bg-rgb: 21, 24, 29;
-  --c-text-rgb: 233, 236, 240;
-  --c-accent-rgb: 123, 104, 250;
-  --c-accent-alt-rgb: 69, 217, 239;
+  --c-bg-rgb: 12, 20, 24;
+  --c-surface-rgb: 20, 33, 42;
+  --c-text-rgb: 228, 241, 245;
+  --c-accent-rgb: 46, 211, 183;
+  --c-accent-alt-rgb: 77, 166, 255;
 
-  --g-brand: linear-gradient(135deg, #7b68fa, #45d9ef);
+  --g-brand: linear-gradient(#2ed3b7, #2ed3b7);
+
+  color-scheme: dark;
 }
 
 html {
@@ -77,16 +80,18 @@ input {
   font-family: inherit;
 }
 
-@keyframes spin360 {
-  to {
-    transform: rotate(360deg);
-  }
+/* Film grain (components/Backdrop.tsx). Overlay on a dark ground lifts the
+   noise into view; on paper the same overlay all but vanishes, so the light
+   tone multiplies it in at a lower strength instead — enough to read as stock,
+   not as dirt. */
+.grain {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
 }
 
-@keyframes ringspin {
-  to {
-    transform: rotate(360deg);
-  }
+html[data-tone='light'] .grain {
+  opacity: 0.035;
+  mix-blend-mode: multiply;
 }
 
 @keyframes caretblink {
@@ -103,8 +108,21 @@ input {
 /* ---------- nav ---------- */
 
 .nav-link {
+  gap: 7px;
+  padding: 5px 11px;
+  font-size: 14px;
   color: var(--c-muted);
   transition: color 0.3s;
+}
+
+/* Five labels in the body face come to ~390px at the desktop spacing, which is
+   wider than a small phone. */
+@media (max-width: 420px) {
+  .nav-link {
+    gap: 4px;
+    padding: 5px 6px;
+    font-size: 13px;
+  }
 }
 
 .nav-link:hover {
@@ -121,6 +139,18 @@ input {
 }
 
 /* ---------- ask bar ---------- */
+
+/* A plain hairline that takes the accent while you are typing. It used to be a
+   conic sweep running round the edge forever, which drew the eye to the field
+   whether or not anyone was using it. */
+.ask-field {
+  border: 1px solid var(--c-border);
+  transition: border-color 0.3s;
+}
+
+.ask-field:focus-within {
+  border-color: var(--c-accent);
+}
 
 .ask-submit {
   border: 1px solid var(--c-border);
@@ -172,12 +202,8 @@ input {
 }
 
 .tile:hover {
-  transform: translateY(-4px);
-  border-color: transparent;
-  background-image:
-    linear-gradient(var(--c-surface), var(--c-surface)), var(--g-brand);
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  transform: translateY(-3px);
+  border-color: var(--c-accent);
 }
 
 .tile svg {
@@ -187,56 +213,6 @@ input {
 
 .tile:hover svg {
   color: var(--brand);
-}
-
-/* ---------- stack marquee ---------- */
-
-/* Decorative icon band under the toolkit grid. Purely background, so it never
-   takes pointer events away from the section above it. */
-.mq-stage {
-  margin-top: 96px;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  pointer-events: none;
-  user-select: none;
-}
-
-.mq-viewport {
-  overflow: hidden;
-  /* Feathered edges so icons slide in and out instead of popping at the cut. */
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 12%,
-    #000 88%,
-    transparent
-  );
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 12%,
-    #000 88%,
-    transparent
-  );
-}
-
-/* Position/scale only — the slide itself is a GSAP tween on [data-marquee],
-   so it survives the reduced-motion animation-duration override below. */
-.marquee {
-  display: flex;
-  width: max-content;
-  opacity: 0.14;
-  will-change: transform;
-}
-
-/* Two identical groups make up the track, so -50% lands exactly one group over.
-   The trailing padding keeps the gap even across the wrap point. */
-.mq-group {
-  display: flex;
-  flex: none;
-  gap: 74px;
-  padding-right: 74px;
 }
 
 /* ---------- projects ---------- */
@@ -270,9 +246,9 @@ input {
   border: 1px solid var(--c-border);
   border-radius: 4px;
   overflow: hidden;
-  background:
-    linear-gradient(160deg, var(--c-border), var(--c-bg)),
-    repeating-linear-gradient(45deg, var(--c-surface) 0 12px, var(--c-bg) 12px 24px);
+  /* Plain surface: the placeholder artwork in public/projects is drawn in a
+     neutral grey on a transparent ground, so this is what gives it the palette. */
+  background: var(--c-surface);
   transition:
     transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.45s;
@@ -305,13 +281,9 @@ input {
   padding: 6px 11px;
   border: 1px solid var(--c-border);
   border-radius: 3px;
-  background: rgba(var(--c-bg-rgb), 0.72);
-  backdrop-filter: blur(6px);
+  background: var(--c-bg);
   color: var(--c-muted);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 13px;
 }
 
 .card-cta {
@@ -380,7 +352,7 @@ input {
 /* Hover belongs to the rows that go somewhere. */
 a.entry-inner:hover,
 a.entry-inner:focus-visible {
-  background: linear-gradient(90deg, var(--c-surface), transparent 70%);
+  background: var(--c-surface);
   padding-left: 16px;
 }
 

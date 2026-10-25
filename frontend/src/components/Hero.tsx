@@ -6,15 +6,7 @@ import { edit } from '../live/bindings';
 import { useEditMode } from '../live/mode';
 import { streamAnswer } from '../lib/ask';
 import { prefersReducedMotion } from '../lib/motion';
-import { color, font, gradient, rgb, textGradient } from '../theme';
-
-const monoMeta = {
-  fontFamily: font.mono,
-  fontSize: 11,
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase' as const,
-  color: color.muted,
-};
+import { color, dataText, font, metaText } from '../theme';
 
 /** The headline's type, shared by the animated and the editable version. */
 const heroName = {
@@ -38,7 +30,6 @@ export function Hero() {
   const chipRow = useRef<HTMLDivElement>(null);
   const answerPanel = useRef<HTMLDivElement>(null);
   const inputEl = useRef<HTMLInputElement>(null);
-  const borderLight = useRef<HTMLDivElement>(null);
   const rollWrap = useRef<HTMLSpanElement>(null);
   const rollInner = useRef<HTMLSpanElement>(null);
 
@@ -221,24 +212,14 @@ export function Hero() {
         <div ref={heroText} style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div
             data-hero-a
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              fontFamily: font.mono,
-              fontSize: 12,
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
-              color: color.muted,
-            }}
+            style={{ ...metaText, display: 'flex', alignItems: 'center', gap: 10, fontSize: 15 }}
           >
             <span
               style={{
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: color.accentAlt,
-                boxShadow: `0 0 10px rgba(${rgb(color.accentAlt)},0.9)`,
+                background: color.accent,
               }}
             />
             <Editable bind={edit.profile.availability()} />
@@ -253,7 +234,7 @@ export function Hero() {
             <Editable
               bind={edit.profile.name()}
               as="h1"
-              style={{ ...heroName, ...textGradient(gradient.headline) }}
+              style={{ ...heroName, color: color.text }}
             />
           ) : (
             <h1 style={{ ...heroName, display: 'flex', flexWrap: 'wrap' }}>
@@ -267,7 +248,7 @@ export function Hero() {
                     style={
                       char === ' '
                         ? { display: 'inline-block', width: '0.28em' }
-                        : { display: 'inline-block', ...textGradient(gradient.headline) }
+                        : { display: 'inline-block' }
                     }
                   >
                     {char === ' ' ? ' ' : char}
@@ -317,7 +298,7 @@ export function Hero() {
                       height: '1.16em',
                       lineHeight: '1.16em',
                       whiteSpace: 'nowrap',
-                      ...textGradient(gradient.brand),
+                      color: color.accent,
                     }}
                   >
                     {s}
@@ -338,102 +319,70 @@ export function Hero() {
         {/* ---------- ask bar ---------- */}
         <div data-hero-d style={{ marginTop: 44, maxWidth: 760, willChange: 'transform' }}>
           <div
+            className="ask-field"
             style={{
               position: 'relative',
-              padding: 1,
-              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '6px 6px 6px 18px',
               borderRadius: 4,
-              background: color.border,
+              background: color.surface,
             }}
           >
-            {/* Conic sweep along the border; speeds up while the input has focus. */}
-            <div
-              ref={borderLight}
+            <span
               aria-hidden="true"
               style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                width: '220%',
-                aspectRatio: '1',
-                margin: '-110% 0 0 -110%',
-                background:
-                  `conic-gradient(from 0deg, transparent 0deg, transparent 300deg, ${color.accent} 340deg, ${color.accentAlt} 356deg, transparent 360deg)`,
-                animation: 'spin360 3s linear infinite',
-              }}
-            />
-            <div
-              style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                padding: '6px 6px 6px 18px',
-                borderRadius: 3,
-                background: color.surface,
+                fontFamily: font.mono,
+                fontSize: 12,
+                letterSpacing: '0.15em',
+                color: color.accent,
               }}
             >
-              <span
-                aria-hidden="true"
-                style={{
-                  fontFamily: font.mono,
-                  fontSize: 12,
-                  letterSpacing: '0.15em',
-                  color: color.accent,
-                }}
-              >
-                &gt;
-              </span>
-              <input
-                ref={inputEl}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') void submit(query);
-                  if (e.key === 'Escape') close();
-                }}
-                onFocus={() => {
-                  if (borderLight.current) borderLight.current.style.animationDuration = '1.1s';
-                }}
-                onBlur={() => {
-                  if (borderLight.current) borderLight.current.style.animationDuration = '3s';
-                }}
-                placeholder={askConfig.placeholder}
-                aria-label={askConfig.placeholder}
-                disabled={atLimit}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  padding: '14px 0',
-                  border: 0,
-                  background: 'transparent',
-                  color: color.text,
-                  fontSize: 17,
-                  outline: 'none',
-                }}
-              />
-              <button
-                type="button"
-                className="ask-submit"
-                data-cursor="link"
-                onClick={() => void submit(query)}
-                disabled={atLimit}
-                style={{
-                  flex: 'none',
-                  padding: '12px 20px',
-                  borderRadius: 3,
-                  background: color.bg,
-                  fontFamily: font.mono,
-                  fontSize: 11,
-                  letterSpacing: '0.15em',
-                  textTransform: 'uppercase',
-                  cursor: atLimit ? 'not-allowed' : 'pointer',
-                }}
-              >
-                Ask
-              </button>
-            </div>
+              &gt;
+            </span>
+            <input
+              ref={inputEl}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') void submit(query);
+                if (e.key === 'Escape') close();
+              }}
+              placeholder={askConfig.placeholder}
+              aria-label={askConfig.placeholder}
+              disabled={atLimit}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: '14px 0',
+                border: 0,
+                background: 'transparent',
+                color: color.text,
+                fontSize: 17,
+                outline: 'none',
+              }}
+            />
+            <button
+              type="button"
+              className="ask-submit"
+              data-cursor="link"
+              onClick={() => void submit(query)}
+              disabled={atLimit}
+              style={{
+                flex: 'none',
+                padding: '12px 20px',
+                borderRadius: 3,
+                background: color.bg,
+                fontFamily: font.body,
+                fontSize: 15,
+                fontWeight: 500,
+                cursor: atLimit ? 'not-allowed' : 'pointer',
+              }}
+            >
+              Ask
+            </button>
           </div>
 
           <div ref={chipRow} style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
@@ -448,9 +397,8 @@ export function Hero() {
                   padding: '8px 13px',
                   borderRadius: 999,
                   background: 'transparent',
-                  fontFamily: font.mono,
-                  fontSize: 11,
-                  letterSpacing: '0.1em',
+                  fontFamily: font.body,
+                  fontSize: 14,
                   cursor: 'pointer',
                 }}
               >
@@ -466,8 +414,7 @@ export function Hero() {
                 padding: '22px 24px',
                 border: `1px solid ${color.border}`,
                 borderRadius: 4,
-                background: `rgba(${rgb(color.surface)},0.86)`,
-                backdropFilter: 'blur(10px)',
+                background: color.surface,
               }}
             >
               <div
@@ -478,15 +425,7 @@ export function Hero() {
                   gap: 16,
                 }}
               >
-                <div
-                  style={{
-                    fontFamily: font.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: color.muted,
-                  }}
-                >
+                <div style={metaText}>
                   {asked ? `↳ ${asked}` : ''}
                 </div>
                 <button
@@ -520,7 +459,7 @@ export function Hero() {
                       display: 'inline-block',
                       width: 8,
                       marginLeft: 2,
-                      borderBottom: `2px solid ${color.accentAlt}`,
+                      borderBottom: `2px solid ${color.accent}`,
                       animation: 'caretblink 1s step-end infinite',
                     }}
                   />
@@ -531,9 +470,9 @@ export function Hero() {
           </div>
         </div>
 
-        <div data-hero-d style={{ marginTop: 26, ...monoMeta, fontSize: 11, letterSpacing: '0.14em' }}>
+        <div data-hero-d style={{ marginTop: 22, ...dataText }}>
           {atLimit
-            ? `session limit reached — ${askConfig.limit} of ${askConfig.limit} questions`
+            ? `Session limit reached: ${askConfig.limit} of ${askConfig.limit} questions`
             : `${askConfig.limit - used} questions left this session`}
         </div>
       </div>

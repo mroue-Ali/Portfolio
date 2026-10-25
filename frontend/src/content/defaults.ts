@@ -34,15 +34,15 @@ import type {
  * inserts, so a site running on the bundled copy looks like the seeded one.
  */
 export const theme: ThemeContent = {
-  preset: 'graphite-violet',
+  preset: 'deep-sea',
   colors: {
-    bg: '#15181D',
-    surface: '#1E2228',
-    border: '#2F353E',
-    text: '#E9ECF0',
-    muted: '#9AA2AD',
-    accent: '#7B68FA',
-    accentAlt: '#45D9EF',
+    bg: '#0C1418',
+    surface: '#14212A',
+    border: '#23353F',
+    text: '#E4F1F5',
+    muted: '#8FA6AF',
+    accent: '#2ED3B7',
+    accentAlt: '#4DA6FF',
   },
   cursor: { style: 'reticle', size: 36, spin: true },
   trail: {
@@ -67,12 +67,12 @@ export const theme: ThemeContent = {
 
 export const profile: Profile = {
   name: 'Ali Mroue',
-  availability: 'Beirut, Lebanon — available for work',
+  availability: 'Beirut, Lebanon',
   role: 'Full-Stack AI Engineer',
   /** Cycled by the rolling headline. */
   specialities: ['RAG Systems', 'Document Pipelines', 'React & React Native'],
   intro:
-    'Three years shipping production systems. Now building retrieval pipelines, ingestion, and LLM integration — from the vector store to the UI.',
+    "I've shipped production web apps for three years. These days I mostly build retrieval systems, from document ingestion and vector search through to the interface people use.",
   email: 'alimroue2001@gmail.com',
   phone: '+961 81 651 281',
   phoneHref: 'tel:+96181651281',
@@ -95,54 +95,54 @@ export const ask: AskConfig = {
   /** Questions allowed per session before the bar locks. */
   limit: 10,
   fallback:
-    "I haven't written an answer for that one. What I can tell you: I build retrieval systems end to end — ingestion, chunking, vector search, API, interface — and I've shipped four production stacks doing it. Ask me about the RAG pipeline, the routing problem, or whether I'm free.",
+    "I haven't written an answer for that one. What I can tell you: I build retrieval systems end to end (ingestion, chunking, vector search, API, interface) and I've shipped four production stacks doing it. Ask me about the RAG pipeline, the routing problem, or whether I'm free.",
 };
 
 export const answers: Answer[] = [
   {
     keywords: ['image', 'images', 'photo', 'visual', 'picture', 'caption', 'multimodal'],
-    question: 'How does his RAG pipeline handle images?',
+    question: 'How does your RAG pipeline handle images?',
     answer:
       "Embedded images get captioned at ingestion, so a diagram or a scanned table becomes searchable text sitting next to the chunk it came from. The caption carries the parent document's metadata, which means retrieval can filter on it the same way it filters text. When an image chunk wins, the UI surfaces the source so you can see what it actually matched.",
   },
   {
     keywords: ['shipped', 'end to end', 'built', 'projects', 'work', 'portfolio'],
-    question: 'What has he shipped end to end?',
+    question: 'What have you shipped end to end?',
     answer:
-      'Four systems. A RAG platform over private document collections — ingestion through retrieval through UI. A clinical data capture platform with a CRF builder and full audit trails. A multi-tenant delivery operations platform with Shopify and WooCommerce webhooks processed exactly once. And a Quran app shipped to web, then to app stores off the same component architecture.',
+      'Four systems. A RAG platform over private document collections, covering ingestion, retrieval and the UI. A clinical data capture platform with a CRF builder and full audit trails. A multi-tenant delivery operations platform with Shopify and WooCommerce webhooks processed exactly once. And a Quran app shipped to web, then to app stores off the same component architecture.',
   },
   {
     keywords: ['django', '.net', 'dotnet', 'net core', 'prefer', 'which', 'backend', 'compare'],
     question: 'Django or .NET?',
     answer:
-      "Django when the job is speed and the data model is the product — the delivery platform went from nothing to multi-tenant with webhooks in weeks. .NET when the requirement is regulatory traceability and typed contracts, which is why the clinical EDC system was built on it. I've owned both in production, so the answer is whichever one the constraints pick.",
+      "Django when the job is speed and the data model is the product: the delivery platform went from nothing to multi-tenant with webhooks in weeks. .NET when the requirement is regulatory traceability and typed contracts, which is why the clinical EDC system was built on it. I've owned both in production, so the answer is whichever one the constraints pick.",
   },
   {
     keywords: ['available', 'hire', 'hiring', 'free', 'availability', 'open', 'remote', 'contract'],
-    question: 'Is he available?',
+    question: 'Are you available?',
     answer:
-      'Yes — working independently out of Beirut and taking on new work now, remote or hybrid. Currently shipping client web apps and RAG systems end to end, and running the infrastructure they sit on. Email is the fastest way in.',
+      "Yes. I'm working independently out of Beirut and taking on new work now, remote or hybrid. Right now I'm shipping client web apps and RAG systems end to end, and running the infrastructure they sit on. Email is the fastest way to reach me.",
   },
   {
     keywords: ['webhook', 'exactly-once', 'idempotent', 'shopify', 'woocommerce', 'reconcil'],
-    question: 'How does he keep webhooks exactly-once?',
+    question: 'How do you keep webhooks exactly-once?',
     answer:
-      "Every inbound event is keyed and claimed through Redis before any work happens, so a duplicate delivery finds the lock already taken and exits. Celery does the processing off the request path. Then a scheduled reconciliation sweeps the provider's API for anything the webhook stream dropped entirely — because it always drops something.",
+      "Every inbound event is keyed and claimed through Redis before any work happens, so a duplicate delivery finds the lock already taken and exits. Celery does the processing off the request path. Then a scheduled reconciliation sweeps the provider's API for anything the webhook stream dropped entirely, because it always drops something.",
   },
   {
     keywords: ['15000', '15,000', 'routes', 'routing', 'stores', 'driver', 'map'],
     question: 'What was the 15,000-store routing problem?',
     answer:
-      "Fifteen thousand stores had to be split across six driver regions and covered every week, over an offline embedded map. I partitioned the set geographically, then generated weekly routes that guaranteed full coverage instead of just short trips. The hard part wasn't the algorithm, it was making it stable when the store list changed under it.",
+      "Fifteen thousand stores had to be split across six driver regions and covered every week, over an offline embedded map. I partitioned the set geographically, then generated weekly routes that guaranteed full coverage instead of just short trips. Most of the work went into keeping the routes stable when the store list changed under them.",
   },
 ];
 
 export const about: AboutContent = {
-  eyebrow: '01 / the person',
-  heading: 'I build the whole line.',
+  eyebrow: 'about',
+  heading: "Hi, I'm Ali.",
   portraitPlaceholder: 'portrait / drop image here',
   paragraphs: [
-    "Ingestion, chunking, vector search, API, and the interface people actually touch. Most of my work has been on systems where the hard part isn't the model, it's everything around it: parsing messy real-world documents, keeping webhooks exactly-once, making 15,000 stores fit into six drivers' weeks.",
+    "I work across the whole stack: ingestion, chunking, vector search, the API, and the interface people use. Most of my time goes into the parts around the model, like parsing messy real-world documents, keeping webhooks exactly-once, and fitting 15,000 stores into six drivers' weeks.",
     'Right now I work independently, running my own Linux VPS with Docker Compose and GitHub Actions, and shipping client web apps and RAG systems end to end.',
   ],
   stats: [
@@ -153,8 +153,8 @@ export const about: AboutContent = {
 };
 
 export const stack: StackContent = {
-  eyebrow: '02 / the toolkit',
-  heading: 'Things I reach for.',
+  eyebrow: 'toolkit',
+  heading: 'What I work with',
   groups: [
     {
       name: 'Languages',
@@ -217,8 +217,8 @@ export const stack: StackContent = {
 };
 
 export const projects: ProjectsContent = {
-  eyebrow: '03 / selected work',
-  heading: 'Four things worth showing.',
+  eyebrow: 'selected work',
+  heading: 'Projects',
   /** The CMS switches this to 'list' while screenshots and links are missing. */
   layout: 'showcase',
   items: [
@@ -284,13 +284,13 @@ export const projects: ProjectsContent = {
 };
 
 export const experience: ExperienceContent = {
-  eyebrow: '04 / the path',
-  heading: "Where I've built.",
+  eyebrow: 'path',
+  heading: 'Experience',
   roles: [
     {
       period: 'Jan 2026 – Present',
       title: 'Full-Stack AI Engineer · Independent',
-      body: 'Ships client web apps and RAG systems end to end: ingestion, vector search, backend APIs, React/TypeScript frontends, deployment. Runs his own infrastructure — self-managed Linux VPS, Docker Compose, GitHub Actions, Vercel.',
+      body: 'Ships client web apps and RAG systems end to end: ingestion, vector search, backend APIs, React/TypeScript frontends, deployment. Runs his own infrastructure: self-managed Linux VPS, Docker Compose, GitHub Actions, Vercel.',
     },
     {
       period: 'Jul 2025 – Dec 2025',
@@ -315,9 +315,9 @@ export const experience: ExperienceContent = {
 };
 
 export const contact: ContactContent = {
-  eyebrow: '05 / next',
-  heading: 'Send me a hard problem.',
+  eyebrow: 'contact',
+  heading: 'Contact me for freelance work',
   cta: 'Start a conversation',
-  colophon: 'Built with React, GSAP, and too much coffee.',
+  colophon: 'Built with React, GSAP and FastAPI, and edited from its own CMS.',
   place: 'Beirut, 2026.',
 };

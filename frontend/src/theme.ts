@@ -26,22 +26,53 @@ export type Preset = {
 /**
  * The shipped palettes.
  *
- * Each is built the same way, which is what keeps them all working: a near-black
- * background, a surface a few points lighter, a border that reads at a glance
- * without drawing the eye, near-white text, a muted around 55% luminance, and
- * two accents close enough on the wheel to gradient cleanly into each other.
- * Swap any of them in and every gradient, hover and glow on the site stays
- * balanced, because they all resolve through the same seven roles.
+ * Each is built the same way, which is what keeps them all working: a ground, a
+ * surface one visible step off it, a border that reads at a glance without
+ * drawing the eye, text at the far end of the scale, a muted that still passes
+ * AA on both ground and surface, and an accent. The second accent is for small
+ * marks — hover, focus, dates — never for a sweep into the first.
  *
- * All dark: the site's atmosphere — additive trail, glow layers, film grain —
- * is composited for a dark ground, and a light palette would need those reworked
- * rather than recoloured.
+ * Most are dark. The paper sets turn the scale over: `applyTheme` marks the
+ * document `data-tone="light"`, which is what the grain blend, the trail's
+ * compositing and anything else that depends on the ground key off — so a
+ * light palette is just seven colours, like any other.
  */
 export const PRESETS: readonly Preset[] = [
   {
+    key: 'deep-sea',
+    label: 'Deep Sea',
+    note: 'Teal on near-black green. Calm, technical. The default.',
+    colors: {
+      bg: '#0C1418',
+      surface: '#14212A',
+      border: '#23353F',
+      text: '#E4F1F5',
+      muted: '#8FA6AF',
+      accent: '#2ED3B7',
+      accentAlt: '#4DA6FF',
+    },
+  },
+  {
+    key: 'sea-salt',
+    label: 'Sea Salt',
+    note: 'Deep Sea turned to paper: cool grey-green ground, deep teal ink.',
+    // Tinted toward the Deep Sea hue rather than warm cream, which is the
+    // stock light palette of generated sites. Surface sits the same step off
+    // the ground as Deep Sea's does; muted and accent both clear AA on it.
+    colors: {
+      bg: '#E9EEED',
+      surface: '#F7F9F8',
+      border: '#CBD5D4',
+      text: '#0F1A1E',
+      muted: '#4E5E66',
+      accent: '#0A7666',
+      accentAlt: '#2A5FA5',
+    },
+  },
+  {
     key: 'graphite-violet',
     label: 'Graphite Violet',
-    note: 'The original. Cool graphite under violet and cyan.',
+    note: 'Cool graphite under violet and cyan. The first palette.',
     colors: {
       bg: '#15181D',
       surface: '#1E2228',
@@ -64,20 +95,6 @@ export const PRESETS: readonly Preset[] = [
       muted: '#94A3B1',
       accent: '#38BDF8',
       accentAlt: '#818CF8',
-    },
-  },
-  {
-    key: 'deep-sea',
-    label: 'Deep Sea',
-    note: 'Teal on near-black green. Calm, technical.',
-    colors: {
-      bg: '#0C1418',
-      surface: '#14212A',
-      border: '#23353F',
-      text: '#E4F1F5',
-      muted: '#8FA6AF',
-      accent: '#2ED3B7',
-      accentAlt: '#4DA6FF',
     },
   },
   {
@@ -190,6 +207,21 @@ export const luminance = (hex: string): number => {
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 };
 
+/** WCAG contrast ratio, 1-21, for colours the palette does not control. */
+export const contrast = (a: string, b: string): number => {
+  const relative = (hex: string) => {
+    const [r, g, b] = rgb(hex)
+      .split(',')
+      .map((v) => {
+        const c = Number(v) / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const [hi, lo] = [relative(a), relative(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
 export const font = {
   display: "'Clash Display', sans-serif",
   body: "'Satoshi', system-ui, sans-serif",
@@ -203,10 +235,16 @@ export const gradient = {
   headline: '',
 };
 
-const brandGradient = (c: ThemeColors) => `linear-gradient(135deg, ${c.accent}, ${c.accentAlt})`;
+// Deliberately flat. A two-stop sweep across headline text is the single most
+// recognisable mark of a generated site, so both recipes resolve to one colour:
+// the accent for marks, the text colour for headlines. The names stay so every
+// caller, and the CMS preview, keep working unchanged.
+const brandGradient = (c: ThemeColors) => `linear-gradient(${c.accent}, ${c.accent})`;
 
-const headlineGradient = (c: ThemeColors) =>
-  `linear-gradient(135deg, ${c.text} 10%, ${c.accent} 55%, ${c.accentAlt} 100%)`;
+const headlineGradient = (c: ThemeColors) => `linear-gradient(${c.text}, ${c.text})`;
+
+/** True for a palette whose ground is light: the paper presets. */
+export const isLight = (colors: ThemeColors = color) => luminance(colors.bg) > 0.5;
 
 /**
  * Publishes a palette to the module exports and to the document.
@@ -232,11 +270,28 @@ export function applyTheme(colors: ThemeColors = themeContent.colors) {
   // Channel triplets, so a stylesheet can build its own alpha without knowing
   // the hex — `rgba(var(--c-accent-rgb), 0.35)`.
   root.setProperty('--c-bg-rgb', rgb(colors.bg));
+  root.setProperty('--c-surface-rgb', rgb(colors.surface));
   root.setProperty('--c-text-rgb', rgb(colors.text));
   root.setProperty('--c-accent-rgb', rgb(colors.accent));
   root.setProperty('--c-accent-alt-rgb', rgb(colors.accentAlt));
 
   root.setProperty('--g-brand', gradient.brand);
+
+  // Light and dark grounds need different atmosphere — grain blend, shadow
+  // depth — so the stylesheet keys those off this rather than off a hex. It
+  // also tells the browser, so scrollbars, form controls and the mobile
+  // address bar match the page instead of flashing the other scheme.
+  const tone = isLight(colors) ? 'light' : 'dark';
+  document.documentElement.dataset.tone = tone;
+  root.setProperty('color-scheme', tone);
+
+  let meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = 'theme-color';
+    document.head.appendChild(meta);
+  }
+  meta.content = colors.bg;
 }
 
 // The module's own exports have to be valid before anything imports them, and
@@ -265,12 +320,37 @@ export const ease = {
  * object is built once at module load — before `applyTheme` has run — and a hex
  * copied out here would never hear about a palette change. Anything evaluated at
  * module scope has to go through `var()` for the same reason.
+ *
+ * Set as typed: no forced capitals, no wide tracking. A tracked all-caps mono
+ * line over every heading is template chrome, and it says less than the words.
  */
 export const monoLabel = {
   fontFamily: font.mono,
   fontSize: 12,
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase' as const,
+  letterSpacing: '0.01em',
+  color: 'var(--c-muted)',
+};
+
+/**
+ * The two kinds of small type, kept apart on purpose.
+ *
+ * `metaText` is for words — field labels, group names, footnotes, the colophon —
+ * and is set in the body face. `dataText` is for things that are data — dates,
+ * numbers, tags, the question counter — and is the only place mono appears
+ * outside the eyebrows. Monospace as decoration on every caption was the other
+ * half of the generated look; on data it still earns its keep.
+ */
+export const metaText = {
+  fontFamily: font.body,
+  fontSize: 14,
+  lineHeight: 1.45,
+  color: 'var(--c-muted)',
+};
+
+export const dataText = {
+  fontFamily: font.mono,
+  fontSize: 12,
+  letterSpacing: '0.01em',
   color: 'var(--c-muted)',
 };
 
@@ -281,4 +361,5 @@ export const sectionHeading = {
   fontSize: 'clamp(34px, 4.6vw, 56px)',
   lineHeight: 1.02,
   letterSpacing: '-0.03em',
+  textWrap: 'balance' as const,
 };

@@ -1,9 +1,12 @@
 import { nav } from '../content';
-import { color, font, gradient, rgb } from '../theme';
+import { color, font } from '../theme';
 
 /**
  * Floating section nav. Hidden until the hero scrolls away, and the active pill
  * is driven by ScrollTrigger via the `data-active` attribute (see useSiteAnimations).
+ *
+ * Solid rather than frosted: a blurred glass pill is the stock nav of generated
+ * sites, and an opaque one reads the same over every section it passes.
  */
 export function Nav() {
   return (
@@ -23,8 +26,7 @@ export function Nav() {
         padding: '7px 10px',
         border: `1px solid ${color.border}`,
         borderRadius: 999,
-        background: `rgba(${rgb(color.surface)},0.72)`,
-        backdropFilter: 'blur(14px)',
+        background: color.surface,
       }}
     >
       {nav.map((item) => (
@@ -34,17 +36,13 @@ export function Nav() {
           className="nav-link"
           data-cursor="link"
           data-nav-link={item.id}
+          // Gap, padding and size live in global.css, which tightens them on phones.
           style={{
             position: 'relative',
             display: 'flex',
             alignItems: 'center',
-            gap: 7,
-            padding: '5px 11px',
             borderRadius: 999,
-            fontFamily: font.mono,
-            fontSize: 11,
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
+            fontFamily: font.body,
           }}
         >
           <span
@@ -53,7 +51,7 @@ export function Nav() {
               width: 5,
               height: 5,
               borderRadius: '50%',
-              background: gradient.brand,
+              background: color.accent,
               opacity: 0,
               transition: 'opacity 0.3s',
             }}

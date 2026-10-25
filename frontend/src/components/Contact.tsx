@@ -1,23 +1,15 @@
 import { profile } from '../content';
 import { Editable } from '../live/Editable';
 import { edit } from '../live/bindings';
-import { color, font, monoLabel } from '../theme';
+import { color, font, metaText, monoLabel } from '../theme';
 
-const fieldLabel = {
-  fontFamily: font.mono,
-  fontSize: 10,
-  letterSpacing: '0.18em',
-  textTransform: 'uppercase' as const,
-  color: color.muted,
-};
+const fieldLabel = metaText;
 
 const linkStyle = {
-  padding: '14px 20px',
+  padding: '12px 18px',
   borderRadius: 3,
-  fontFamily: font.mono,
-  fontSize: 11,
-  letterSpacing: '0.15em',
-  textTransform: 'uppercase' as const,
+  fontFamily: font.body,
+  fontSize: 15,
 };
 
 export function Contact() {
@@ -100,7 +92,7 @@ export function Contact() {
                   right: 0,
                   bottom: -6,
                   height: 2,
-                  background: `linear-gradient(90deg, ${color.accent}, ${color.accentAlt})`,
+                  background: color.accent,
                 }}
               />
             </a>
@@ -119,16 +111,15 @@ export function Contact() {
               borderRadius: 3,
               background: color.surface,
               color: color.text,
-              fontFamily: font.mono,
-              fontSize: 12,
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase',
+              fontFamily: font.body,
+              fontSize: 16,
+              fontWeight: 500,
               whiteSpace: 'nowrap',
               willChange: 'transform',
             }}
           >
             <Editable bind={edit.contact.cta()} />
-            <span aria-hidden="true" style={{ color: color.accentAlt }}>
+            <span aria-hidden="true" style={{ color: color.accent }}>
               →
             </span>
           </a>
@@ -203,11 +194,7 @@ export function Contact() {
             marginTop: 20,
             paddingTop: 26,
             borderTop: `1px solid ${color.border}`,
-            fontFamily: font.mono,
-            fontSize: 11,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: color.muted,
+            ...metaText,
           }}
         >
           <Editable bind={edit.contact.colophon()} />

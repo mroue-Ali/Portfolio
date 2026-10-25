@@ -1,7 +1,7 @@
 import { experience } from '../content';
 import { Editable } from '../live/Editable';
 import { edit } from '../live/bindings';
-import { color, font, monoLabel, sectionHeading } from '../theme';
+import { color, dataText, font, metaText, monoLabel, sectionHeading } from '../theme';
 
 export function Experience() {
   return (
@@ -45,7 +45,7 @@ export function Experience() {
               top: 6,
               bottom: 6,
               width: 2,
-              background: `linear-gradient(180deg, ${color.accent}, ${color.accentAlt})`,
+              background: color.accent,
               transform: 'scaleY(0)',
               transformOrigin: 'top center',
             }}
@@ -72,13 +72,7 @@ export function Experience() {
                   <Editable
                     bind={edit.role.period(role)}
                     as="div"
-                    style={{
-                      fontFamily: font.mono,
-                      fontSize: 11,
-                      letterSpacing: '0.15em',
-                      textTransform: 'uppercase',
-                      color: color.accentAlt,
-                    }}
+                    style={{ ...dataText, color: color.accent }}
                   />
                   <Editable
                     bind={edit.role.title(role)}
@@ -117,11 +111,7 @@ export function Experience() {
             marginTop: 76,
             paddingTop: 30,
             borderTop: `1px solid ${color.border}`,
-            fontFamily: font.mono,
-            fontSize: 11,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: color.muted,
+            ...metaText,
           }}
         >
           {experience.footnotes.map((note, i) => (

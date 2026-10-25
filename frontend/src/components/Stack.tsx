@@ -2,15 +2,19 @@ import { stack } from '../content';
 import { ICON_PATHS } from '../content/icons';
 import { Editable } from '../live/Editable';
 import { edit } from '../live/bindings';
-import { color, font, monoLabel, sectionHeading } from '../theme';
+import { color, contrast, dataText, metaText, monoLabel, sectionHeading } from '../theme';
+
+/**
+ * A tool's brand colour, unless it would disappear on the tile.
+ *
+ * Brand colours are whatever the brand chose: Django's green is nearly black and
+ * Expo's mark is nearly white, so one of them vanishes on any given ground. Below
+ * 2:1 against the surface the hover falls back to the text colour.
+ */
+const hoverColour = (brand: string) =>
+  contrast(brand, color.surface) < 2 ? color.text : brand;
 
 export function Stack() {
-  // The marquee shows every tool once per row, split so the two rows differ.
-  const allTiles = stack.groups.flatMap((g) => g.tiles);
-  const half = Math.ceil(allTiles.length / 2);
-  const rowA = allTiles.slice(0, half);
-  const rowB = allTiles.slice(half);
-
   return (
     <section
       id="stack"
@@ -40,14 +44,7 @@ export function Stack() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <Editable
                   bind={edit.stack.groupName(group)}
-                  style={{
-                    fontFamily: font.mono,
-                    fontSize: 11,
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: color.muted,
-                    whiteSpace: 'nowrap',
-                  }}
+                  style={{ ...metaText, fontWeight: 500, color: color.text, whiteSpace: 'nowrap' }}
                 />
                 <span style={{ flex: 1, height: 1, background: color.border }} />
               </div>
@@ -76,7 +73,7 @@ export function Stack() {
                         background: color.surface,
                         cursor: 'default',
                         // Read by .tile:hover svg to reveal the brand colour.
-                        '--brand': tile.color,
+                        '--brand': hoverColour(tile.color),
                       } as React.CSSProperties
                     }
                   >
@@ -85,15 +82,7 @@ export function Stack() {
                     </svg>
                     <Editable
                       bind={edit.stack.tileName(tile)}
-                      style={{
-                        fontFamily: font.mono,
-                        fontSize: 10,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: color.muted,
-                        textAlign: 'center',
-                        lineHeight: 1.3,
-                      }}
+                      style={{ ...metaText, fontSize: 13, lineHeight: 1.3, textAlign: 'center' }}
                     />
                   </div>
                 ))}
@@ -106,14 +95,10 @@ export function Stack() {
                       key={`${pill}-${pillIndex}`}
                       bind={edit.stack.pill(group, pillIndex)}
                       style={{
+                        ...dataText,
                         padding: '6px 11px',
                         border: `1px dashed ${color.border}`,
                         borderRadius: 999,
-                        fontFamily: font.mono,
-                        fontSize: 10,
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        color: color.muted,
                       }}
                     />
                   ))}
@@ -123,38 +108,6 @@ export function Stack() {
           ))}
         </div>
       </div>
-
-      {/* Sliding icon band closing the section. Each row renders its group twice
-          at identical width, so a -50% shift lands exactly one group over and
-          loops with no seam. GSAP drives it (see useSiteAnimations) rather than
-          a CSS keyframe, so the two rows share the page's ticker. */}
-      <div aria-hidden="true" className="mq-stage">
-        {[
-          { row: rowA, dir: 'left', seconds: 26 },
-          { row: rowB, dir: 'right', seconds: 34 },
-        ].map(({ row, dir, seconds }) => (
-          <div key={dir} className="mq-viewport">
-            <div className="marquee" data-marquee={dir} data-marquee-seconds={seconds}>
-              {[0, 1].map((copy) => (
-                <div key={copy} className="mq-group">
-                  {row.map((tile, i) => (
-                    <svg
-                      key={`${tile.name}-${i}`}
-                      viewBox="0 0 24 24"
-                      width="72"
-                      height="72"
-                      style={{ flex: 'none', color: color.text }}
-                    >
-                      <path d={ICON_PATHS[tile.icon] ?? ''} fill="currentColor" />
-                    </svg>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-
     </section>
   );
 }
