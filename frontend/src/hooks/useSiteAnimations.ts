@@ -9,21 +9,13 @@ import { color } from '../theme';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/** Width below which the project track stacks instead of pinning. */
-const PIN_MIN_WIDTH = 900;
-
 /**
  * Owns smooth scrolling and every scroll-driven animation on the page.
  *
  * Runs from App so it mounts after all sections exist, then refreshes
  * ScrollTrigger once every trigger has been measured.
- *
- * `projectsLayout` is the one piece of content the triggers depend on rather
- * than merely describe: the showcase pins a track and the list does not, so
- * switching it in edit mode has to tear the whole setup down and measure again.
- * Everything else can change under GSAP without moving a trigger.
  */
-export function useSiteAnimations(projectsLayout: string) {
+export function useSiteAnimations() {
   useLayoutEffect(() => {
     const reduced = prefersReducedMotion();
 
@@ -105,66 +97,18 @@ export function useSiteAnimations(projectsLayout: string) {
       });
 
       // ---------- projects ----------
-      const track = document.querySelector<HTMLElement>('[data-track]');
-      const pinWrap = document.querySelector<HTMLElement>('[data-pin]');
-      const canPin = window.innerWidth >= PIN_MIN_WIDTH && !reduced;
-
-      /** Screenshot entrance, shared by the pinned and stacked layouts. */
-      const revealShot = (shot: HTMLElement, trigger: ScrollTrigger.Vars) =>
-        gsap.from(shot, {
-          autoAlpha: 0,
-          scale: 0.96,
-          xPercent: 4,
-          duration: 0.8,
-          // No overshoot: a bounce on arrival is the stock template entrance.
-          ease: 'power3.out',
-          scrollTrigger: { trigger: shot, once: true, ...trigger },
-        });
-
-      if (track && pinWrap && canPin) {
-        // Scroll distance needed to bring the last card fully into view.
-        const dist = () =>
-          Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.12);
-        const horizontal = gsap.to(track, {
-          x: () => -dist(),
-          ease: 'none',
-          scrollTrigger: {
-            trigger: pinWrap,
-            start: 'top top',
-            end: () => `+=${dist()}`,
-            pin: true,
-            scrub: 1,
-            invalidateOnRefresh: true,
-            anticipatePin: 1,
-            // Pinning inserts a spacer that lengthens the page. This must refresh
-            // before the section triggers below it, or they measure against the
-            // un-pinned layout and every section after Projects reads as the next one.
-            refreshPriority: 1,
-          },
-        });
-
-        // Cards travel sideways rather than down the page, so their screenshots
-        // are triggered off the horizontal tween instead of the window scroll.
-        gsap.utils.toArray<HTMLElement>('[data-shot]', track).forEach((shot) => {
-          revealShot(shot, { containerAnimation: horizontal, start: 'left 88%' });
-        });
-      } else if (track) {
-        // Stacked layout comes from CSS; just reveal each card on the way past.
-        gsap.utils.toArray<HTMLElement>('[data-card]', track).forEach((card) => {
+      if (!reduced) {
+        gsap.utils.toArray<HTMLElement>('[data-card]').forEach((card, i) => {
           gsap.from(card, {
             y: 34,
             opacity: 0,
             duration: 0.8,
+            // Cards in the same row arrive a beat apart rather than as one block.
+            delay: (i % 3) * 0.08,
             ease: 'power3.out',
-            scrollTrigger: { trigger: card, start: 'top 85%', once: true },
+            scrollTrigger: { trigger: card, start: 'top 88%', once: true },
           });
         });
-
-        if (!reduced) {
-          gsap.utils.toArray<HTMLElement>('[data-shot]', track).forEach((shot) => {
-            revealShot(shot, { start: 'top 88%' });
-          });
-        }
       }
 
       // ---------- experience timeline ----------
@@ -239,5 +183,5 @@ export function useSiteAnimations(projectsLayout: string) {
       lenis?.destroy();
       registerLenis(null);
     };
-  }, [projectsLayout]);
+  }, []);
 }

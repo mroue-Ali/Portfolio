@@ -366,7 +366,7 @@ PROJECTS = [
         ],
         tags=["FastAPI", "Milvus", "LangChain", "Hugging Face", "React", "Docker"],
         image="/projects/knowledge-base-rag.svg",
-        link="https://github.com/",
+        repo="https://github.com/",
         link_label="View the system",
     ),
     dict(
@@ -381,7 +381,7 @@ PROJECTS = [
         ],
         tags=[".NET Core", "Angular", "SurveyJS"],
         image="/projects/electronic-data-capture.svg",
-        link="https://github.com/",
+        repo="https://github.com/",
         link_label="View the platform",
     ),
     dict(
@@ -396,7 +396,7 @@ PROJECTS = [
         ],
         tags=["Django", "React", "Celery", "Redis", "PostgreSQL"],
         image="/projects/delivery-operations.svg",
-        link="https://github.com/",
+        repo="https://github.com/",
         link_label="View the platform",
     ),
     dict(
@@ -410,7 +410,7 @@ PROJECTS = [
         ],
         tags=["Django", "React", "React Native", "Expo"],
         image="/projects/quran-application.svg",
-        link="https://github.com/",
+        repo="https://github.com/",
         link_label="View the app",
     ),
 ]

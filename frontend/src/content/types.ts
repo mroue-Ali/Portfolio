@@ -51,9 +51,13 @@ export type Project = {
    * extension here. A missing file leaves the empty frame rather than breaking.
    */
   image: string;
-  /** Where the card links to. TODO: swap in the real repo / case-study URLs. */
+  /** The live site. Empty hides the "Visit site" button on the details view. */
   link: string;
-  /** Wording for the card's affordance. */
+  /** Source repository. Empty hides the "View repo" button. */
+  repo: string;
+  /** Long write-up on the details view; paragraphs split on blank lines. */
+  description: string;
+  /** Wording for the "Visit site" button. */
   linkLabel: string;
 };
 

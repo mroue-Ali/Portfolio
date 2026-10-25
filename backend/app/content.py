@@ -187,6 +187,8 @@ def build_content(db: Session) -> schemas.SiteContent:
                     tags=p.tags,
                     image=p.image,
                     link=p.link,
+                    repo=p.repo,
+                    description=p.description,
                     link_label=p.link_label,
                 )
                 for p in projects

@@ -311,7 +311,12 @@ class Project(TimestampMixin, Ordered, Base):
     tags: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
     #: Path under frontend/public, e.g. /projects/knowledge-base-rag.svg.
     image: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    #: The live site. Empty hides the "Visit site" button.
     link: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    #: Source repository. Empty hides the "View repo" button.
+    repo: Mapped[str] = mapped_column(String(255), default="", nullable=False)
+    #: The long write-up on the details view; paragraphs split on blank lines.
+    description: Mapped[str] = mapped_column(Text, default="", nullable=False)
     #: Wording for the card's affordance.
     link_label: Mapped[str] = mapped_column(String(80), default="", nullable=False)
     published: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)

@@ -112,6 +112,8 @@ class ProjectOut(Public):
     tags: list[str]
     image: str
     link: str
+    repo: str
+    description: str
     link_label: str
 
 
@@ -564,6 +566,8 @@ class ProjectCreate(Admin):
     tags: list[str] = Field(default_factory=list)
     image: str = ""
     link: str = ""
+    repo: str = ""
+    description: str = ""
     link_label: str = ""
     published: bool = True
     position: int = 0
@@ -577,6 +581,8 @@ class ProjectUpdate(Admin):
     tags: Optional[list[str]] = None
     image: Optional[str] = None
     link: Optional[str] = None
+    repo: Optional[str] = None
+    description: Optional[str] = None
     link_label: Optional[str] = None
     published: Optional[bool] = None
     position: Optional[int] = None

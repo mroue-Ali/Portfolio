@@ -274,6 +274,18 @@ export const edit = {
         },
       }),
 
+    description: (project: Project): Binding =>
+      make({
+        value: project.description,
+        label: 'Description',
+        multiline: true,
+        editable: project.id != null,
+        write: (next) => api.projects.update(project.id!, { description: next }),
+        apply: (next) => {
+          project.description = next;
+        },
+      }),
+
     linkLabel: (project: Project): Binding =>
       make({
         value: project.linkLabel,

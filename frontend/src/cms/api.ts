@@ -316,6 +316,8 @@ export type ProjectRow = {
   tags: string[];
   image: string;
   link: string;
+  repo: string;
+  description: string;
   link_label: string;
   published: boolean;
   position: number;

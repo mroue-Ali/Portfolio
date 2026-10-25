@@ -36,3 +36,13 @@ export function scrollToSection(id: string) {
     },
   );
 }
+
+/**
+ * Freezes the page under an overlay. Lenis drives the scroll from the wheel, so
+ * `overflow: hidden` alone would not stop it — both are needed.
+ */
+export function lockScroll(locked: boolean) {
+  document.documentElement.style.overflow = locked ? 'hidden' : '';
+  if (locked) lenis?.stop();
+  else lenis?.start();
+}
