@@ -417,29 +417,111 @@ html[data-tone='light'] .grain {
   color: var(--c-text);
 }
 
-/* Uncropped: each image keeps its own aspect ratio, capped so a tall phone
-   capture doesn't run several screens long. Click opens the original. */
-.details-gallery {
+/* Uncropped: one fixed-height stage, each slide fitted inside it whole, so
+   slides of different shapes letterbox instead of resizing the sheet. */
+.carousel {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 14px;
 }
 
-.details-gallery a {
-  display: flex;
-  justify-content: center;
+.carousel-stage {
+  position: relative;
   border: 1px solid var(--c-border);
   border-radius: 6px;
   background: var(--c-bg);
   overflow: hidden;
 }
 
-.details-gallery img {
+.carousel-track {
+  display: flex;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: min(62vh, 560px);
+  padding: 12px;
+}
+
+.carousel-slide img {
   display: block;
   max-width: 100%;
-  max-height: 80vh;
-  width: auto;
-  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--c-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c-surface) 85%, transparent);
+  color: var(--c-text);
+  font-size: 16px;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: border-color 0.25s;
+}
+
+.carousel-arrow:hover {
+  border-color: var(--c-accent);
+}
+
+.carousel-arrow.is-prev {
+  left: 14px;
+}
+
+.carousel-arrow.is-next {
+  right: 14px;
+}
+
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--c-border);
+  cursor: pointer;
+  transition:
+    width 0.3s,
+    background 0.3s;
+}
+
+.carousel-dot.is-active {
+  width: 22px;
+  background: var(--c-accent);
+}
+
+.carousel-count {
+  margin-left: 8px;
+  color: var(--c-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 599px) {
+  .carousel-slide {
+    height: 46vh;
+  }
+
+  .carousel-arrow {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .details-prose {
